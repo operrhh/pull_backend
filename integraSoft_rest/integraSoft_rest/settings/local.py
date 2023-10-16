@@ -21,7 +21,7 @@ DATABASES = {
         'HOST': config('DB_DEFAULT_HOST'),
         'PORT': config('DB_DEFAULT_PORT')
     },
-    # 'people_soft_luky': {
+    # 'pe ople_soft_luky': {
     #     'ENGINE': ENGINE,
     #     'NAME': config('DB_PEOPLE_SOFT_LUKY_NAME'),
     #     'USER': config('DB_PEOPLE_SOFT_LUKY_USER'),

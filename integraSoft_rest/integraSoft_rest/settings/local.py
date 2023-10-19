@@ -1,11 +1,12 @@
+import os
 from .base import *
 from decouple import config
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["192.168.0.107", "127.0.0.1", "0.0.0.0"]
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

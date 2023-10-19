@@ -1,0 +1,22 @@
+name: CI/CD Prueba
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Run deployment script
+      run: ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_IP }} 'bash /home/integrasoft/Backend/backend/integrasoft/.github/scripts/deploy.sh
+'
+      env:
+        SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
+        SERVER_IP: ${{ secrets.SERVER_IP }}
+

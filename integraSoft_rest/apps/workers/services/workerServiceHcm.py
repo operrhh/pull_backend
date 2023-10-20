@@ -28,6 +28,8 @@ class WorkerServiceHcm:
         else:
             raise ExceptionWorkerHcm('Error al consultar usuarios')
 
+        #This is a comment
+
     def get_worker_hcm(self, pk):
 
         params = self.params_definition(pk)

@@ -28,7 +28,7 @@ class WorkerServiceHcm:
         else:
             raise ExceptionWorkerHcm('Error al consultar usuarios')
 
-        #This is a comment
+        #This is a comment for new branch
 
     def get_worker_hcm(self, pk):
 

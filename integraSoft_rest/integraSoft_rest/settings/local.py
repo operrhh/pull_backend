@@ -22,14 +22,6 @@ DATABASES = {
         'HOST': config('DB_DEFAULT_HOST'),
         'PORT': config('DB_DEFAULT_PORT')
     },
-    # 'pe ople_soft_luky': {
-    #     'ENGINE': ENGINE,
-    #     'NAME': config('DB_PEOPLE_SOFT_LUKY_NAME'),
-    #     'USER': config('DB_PEOPLE_SOFT_LUKY_USER'),
-    #     'PASSWORD': config('DB_PEOPLE_SOFT_LUKY_PASSWORD'),
-    #     'HOST': config('DB_PEOPLE_SOFT_LUKY_HOST'),
-    #     'PORT': config('DB_PEOPLE_SOFT_LUKY_PORT')
-    # },
     'people_soft': {
         'ENGINE': ENGINE,
         'NAME': config('DB_PEOPLE_SOFT_NAME'),

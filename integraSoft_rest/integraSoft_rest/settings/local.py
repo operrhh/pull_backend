@@ -13,6 +13,8 @@ ALLOWED_HOSTS = ["192.168.0.107", "127.0.0.1", "0.0.0.0"]
 
 ENGINE = 'django.db.backends.oracle'
 
+#Comment
+
 DATABASES = {
     'default': {
         'ENGINE': ENGINE,

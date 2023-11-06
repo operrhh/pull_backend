@@ -3,32 +3,37 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
+#Paginations
+from ..pagination import CustomPaginationPeopleSoft, CustomPaginationHcm
+
 #Serializers
 from .serializers import WorkerHcmSerializer, WorkerPeopleSoftSerializer
-
-#Odt
-from . .odts import WorkerOdt
 
 # Service
 from ..services.workerServiceHcm import WorkerServiceHcm
 from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 
 
-# HCM
-
+# region HCM
 @api_view(['GET','POST'])
-def worker_hcm_api_view(request):
+def workers_hcm_api_view(request):
     if request.method == 'GET':
         worker_service = WorkerServiceHcm()
         try:
             workers = worker_service.get_workers_hcm()
-            workers_serializer = WorkerHcmSerializer(workers, many=True)
-            return Response(workers_serializer.data,status = status.HTTP_200_OK)
+            if workers:
+                pagination = CustomPaginationHcm()
+                pagination.queryset = workers
+                result_page = pagination.paginate_queryset(workers, request)
+                if result_page is not None:
+                    workers_serializer = WorkerHcmSerializer(result_page, many=True)
+                    response = pagination.get_paginated_response(workers_serializer.data)
+                    return Response(response.data, status = status.HTTP_200_OK)
         except Exception as e:
             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def worker_hcm_detail_api_view(request,pk):
+def worker_hcm_api_view(request,pk):
     if request.method == 'GET':
         worker_service = WorkerServiceHcm()
         try:
@@ -52,17 +57,36 @@ def worker_hcm_update_api_view(request,pk):
             # print("Entre a la excepcion de worker_update_api_view -> message: " + str(e))
             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
 
+# endregion
 
-# PeopleSoft
-
+# region PeopleSoft
 @api_view(['GET'])
-def worker_peoplesoft_api_view(request):
+def workers_peoplesoft_api_view(request):
     if request.method == 'GET':
         worker_service = WorkerServicePeopleSoft()
         try:
-            workers = worker_service.get_worker_peoplesoft()
+            workers = worker_service.get_workers_peoplesoft(request)
             if workers:
-                workers_serializer = WorkerPeopleSoftSerializer(workers, many=True)
-                return Response(workers, status = status.HTTP_200_OK)
+                pagination = CustomPaginationPeopleSoft()
+                pagination.queryset = workers
+                result_page = pagination.paginate_queryset(workers, request)
+                if result_page is not None:
+                    workers_serializer = WorkerPeopleSoftSerializer(result_page, many=True)
+                    response = pagination.get_paginated_response(workers_serializer.data)
+                    return Response(response.data, status = status.HTTP_200_OK)
         except Exception as e:
             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def worker_peoplesoft_api_view(request,pk):
+    if request.method == 'GET':
+        worker_service = WorkerServicePeopleSoft()
+        try:
+            worker = worker_service.get_worker_peoplesoft(pk)
+            if worker:
+                worker_serializer = WorkerPeopleSoftSerializer(worker)
+                return Response(worker_serializer.data, status = status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
+
+# endregion

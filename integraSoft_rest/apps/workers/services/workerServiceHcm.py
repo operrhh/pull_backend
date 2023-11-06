@@ -3,8 +3,6 @@ from ...services.globalService import GlobalService
 from apps.parameters.models import Parameter, ParameterType
 from ..custom_exceptions import ExceptionJson, ExceptionWorkerHcm
 
-from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
-
 class WorkerServiceHcm:
     def __init__(self):
         self.dic_parameter_type = {param.Description: param.id for param in ParameterType.objects.all()}
@@ -131,7 +129,7 @@ class WorkerServiceHcm:
                 'names': result.get('names', []),
                 'emails': result.get('emails', []),
                 'addresses': result.get('addresses', []),
-                'phones': result.get('phones', []),                
+                'phones': result.get('phones', []),
                 'work_relationships': result.get('workRelationships', []),
                 'links': result.get('links', [])
             }

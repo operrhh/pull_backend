@@ -11,11 +11,12 @@ class WorkerServicePeopleSoft:
     def get_workers_peoplesoft(self):
 
         p_name = ""
+        p_emplid = "19"
 
         try:
             with connections['people_soft'].cursor() as cursor:
                 out_cur = cursor.connection.cursor()
-                cursor.callproc("SP_GET_WORKERS", [out_cur,p_name])
+                cursor.callproc("SP_GET_WORKERS", [out_cur,p_emplid,p_name])
                 if out_cur:
                     items = [res for res in out_cur]
                     if len(items) > 0:

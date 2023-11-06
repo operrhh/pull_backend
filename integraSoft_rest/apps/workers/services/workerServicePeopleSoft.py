@@ -9,14 +9,16 @@ from ..custom_exceptions import ExceptionWorkerPeopleSoft
 class WorkerServicePeopleSoft:
 
     def get_workers_peoplesoft(self):
-
+        
+        p_emplid = ""
         p_name = ""
-        p_emplid = "19"
+        p_business_unit = "EMP96"
+        p_deptid = ""
 
         try:
             with connections['people_soft'].cursor() as cursor:
                 out_cur = cursor.connection.cursor()
-                cursor.callproc("SP_GET_WORKERS", [out_cur,p_emplid,p_name])
+                cursor.callproc("SP_GET_WORKERS", [out_cur, p_emplid, p_name, p_business_unit, p_deptid])
                 if out_cur:
                     items = [res for res in out_cur]
                     if len(items) > 0:
@@ -50,7 +52,7 @@ class WorkerServicePeopleSoft:
             'middle_name', 'second_last_name', 'country', 'address1', 'address2', 'address3', 'address4', 'city',
             'county', 'state', 'home_phone', 'national_id_type', 'national_id', 'sex', 'mar_status', 'highest_educ_lvl',
             'orig_hire_dt', 'per_org', 'cmpny_seniority_dt', 'service_dt', 'last_increase_dt', 'business_title',
-            'effdt', 'hire_dt', 'supervisor_id', 'business_unit', 'business_unit_descr', 'deptid', 'jobcode', 'action',
+            'effdt', 'hire_dt', 'supervisor_id', 'business_unit', 'business_unit_descr', 'deptid','dept_descr', 'jobcode', 'action',
             'action_dt', 'action_reason', 'location', 'job_entry_dt', 'dept_entry_dt', 'reg_temp', 'full_part_time',
             'company', 'paygroup', 'empl_type', 'holiday_schedule', 'std_hours', 'reg_region', 'jobtitle', 'jobtitle_abbrv',
             'deptname', 'deptname_abbrv', 'rehire_dt', 'work_phone', 'nid_country'

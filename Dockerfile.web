@@ -21,11 +21,14 @@ RUN wget https://download.oracle.com/otn_software/linux/instantclient/2111000/in
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el proyecto
-COPY . /app/
+# Copiar el resto del código fuente del proyecto al contenedor
+COPY integraSoft_rest /app/integraSoft_rest
+
+# Cambiar el directorio de trabajo
+WORKDIR /app/integraSoft_rest
 
 # Comando para ejecutar la aplicación
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "integraSoft_rest.integraSoft_rest.wsgi:application"]
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "integraSoft_rest.wsgi:application"]
 
 
 

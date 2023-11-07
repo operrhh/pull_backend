@@ -11,25 +11,24 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Descargar e instalar el cliente instantáneo de Oracle
-RUN mkdir -p /opt/oracle \
-    && cd /opt/oracle \
-    && wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip \
-    && unzip instantclient-basiclite-linuxx64.zip \
-    && rm -f instantclient-basiclite-linuxx64.zip \
-    && mv instantclient_*/ . \
-    && rmdir instantclient_* \
-    && sh -c "echo /opt/oracle > /etc/ld.so.conf.d/oracle-instantclient.conf" \
+RUN wget https://download.oracle.com/otn_software/linux/instantclient/2111000/instantclient-basic-linux.x64-21.11.0.0.0dbru.zip \
+    && unzip instantclient-basic-linux.x64-21.11.0.0.0dbru.zip -d /opt/oracle \
+    && rm instantclient-basic-linux.x64-21.11.0.0.0dbru.zip \
+    && sh -c "echo /opt/oracle/instantclient_21_11 > /etc/ld.so.conf.d/oracle-instantclient.conf" \
     && ldconfig
 
 # Instalar dependencias de Python
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el proyecto
-COPY . /app/
+# Copiar el resto del código fuente del proyecto al contenedor
+COPY integraSoft_rest /app/integraSoft_rest
 
-# Recoger archivos estáticos
-RUN python manage.py collectstatic --noinput
+# Cambiar el directorio de trabajo
+WORKDIR /app/integraSoft_rest
 
 # Comando para ejecutar la aplicación
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "integraSoft_rest.wsgi:application"]
+
+
+

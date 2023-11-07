@@ -1,4 +1,3 @@
-#COMMENT
 # Usar una imagen base oficial de Python
 FROM python:3.10
 
@@ -25,9 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el proyecto
 COPY . /app/
 
-# Recoger archivos estáticos
-RUN python manage.py collectstatic --noinput
-
 # Comando para ejecutar la aplicación
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "integraSoft_rest.wsgi:application"]
+
 

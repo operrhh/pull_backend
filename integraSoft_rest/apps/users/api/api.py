@@ -52,12 +52,3 @@ def user_detail_api_view(request, pk=None):
             return Response({'message':'Usuario eliminado correctamente'}, status=status.HTTP_200_OK)
 
     return Response({'message':'No se ha encontrado un usuario con estos datos'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-# class UserAPIView(APIView):
-
-#     def get(self, request):
-#         users = User.objects.all()
-#         users_serializer = UserSerializer(users, many=True)
-#         return Response(users_serializer.data, status=status.HTTP_200_OK)

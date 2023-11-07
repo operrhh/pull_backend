@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
-    
+
     def update(self, instance, validated_data):
         # Generamos la encriptación de la contraseña al momento de actualizar el usuario
         update_user = super().update(instance, validated_data)

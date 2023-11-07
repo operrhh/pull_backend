@@ -25,6 +25,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Comando para ejecutar la aplicación
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "integraSoft_rest.wsgi:application"]
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "integraSoft_rest.integraSoft_rest.wsgi:application"]
+
 
 

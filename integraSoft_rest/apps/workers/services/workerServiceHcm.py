@@ -1,5 +1,4 @@
 import json
-from urllib.parse import quote
 from ...services.globalService import GlobalService
 from apps.parameters.models import Parameter, ParameterType
 from ..custom_exceptions import ExceptionJson, ExceptionWorkerHcm
@@ -18,28 +17,13 @@ class WorkerServiceHcm:
         response = self.global_service.generate_request(self.dic_url.get('worker'), params)
         if response:
             if response.get('count') != 0:
-                items = response.get('items')
+                items = response.get('items')               
                 workers = self.convert_data(items)
                 return workers
             else:
                 raise ExceptionWorkerHcm('No se han encontrado usuarios')
         else:
             raise ExceptionWorkerHcm('Error al consultar usuarios')
-
-    # def get_worker_hcm(self, request):
-
-    #     params = self.params_definition(request)
-    #     response = self.global_service.generate_request(self.dic_url.get('worker'), params)
-
-    #     if response:
-    #         if response.get('count') != 0:
-    #             items = response.get('items')[0]
-    #             work = self.convert_data(items)
-    #             return work
-    #         else:
-    #             raise ExceptionWorkerHcm('No se ha encontrado un usuario con estos datos')
-    #     else:
-    #         raise ExceptionWorkerHcm('Error al consultar usuario')
 
     def update_worker_hcm(self, body, worker):
             try:
@@ -105,41 +89,38 @@ class WorkerServiceHcm:
                 raise Exception(e) from e
 
     def params_definition(self,request):
-        personNumber = request.query_params.get('personNumber', None)
+        person_number = request.query_params.get('personNumber', None)
         name = request.query_params.get('name', None)
-        bussinesUnit = request.query_params.get('bussinesUnit', None)
+        bussines_unit = request.query_params.get('bussinesUnit', None)
         department = request.query_params.get('department', None)
 
         query_params = ''
         conditions_added = False
 
-        if personNumber:
-            query_params += f"PersonNumber like '{personNumber}%'"
+        if person_number:
+            query_params += f"PersonNumber like '{person_number}%'"
             conditions_added = True
         if name:
             if conditions_added:
                 query_params += ' AND '
-            query_params += f'names.DisplayName like "%{name}%"'
+            query_params += f"upper(names.DisplayName) like '%{name.upper()}%'"
             conditions_added = True
-        if bussinesUnit:
+        if bussines_unit:
             if conditions_added:
                 query_params += ' AND '
-            query_params += f'workRelationships.assignments.BusinessUnitId = "{bussinesUnit}"'
+            query_params += f'workRelationships.assignments.BusinessUnitId = {bussines_unit}'
             conditions_added = True
         if department:
             if conditions_added:
                 query_params += ' AND '
-            query_params += f'workRelationships.assignments.DepartmentId = "{department}"'
+            query_params += f'workRelationships.assignments.DepartmentId = {department}'
         print(f'Query params: {query_params}')
         params = {}
         if query_params != '':
-            # params['q'] = query_params
-            # params['q'] = "PersonNumber='19684785-5'"
-            query_value = quote("PersonNumber like '19684785-5%'")
-            print(query_value)
-            params['q'] = query_value
-            print(f'Params: {params}')
+            params['q'] = query_params
         params['expand'] = 'names,emails,addresses,phones,workRelationships.assignments'
+        print(f'Params: {params}')
+
         return params
 
     def create_worker_data(self,result):
@@ -155,11 +136,11 @@ class WorkerServiceHcm:
                 'creation_date': result.get('CreationDate'),
                 'last_updated_by': result.get('LastUpdatedBy'),
                 'last_update_date': result.get('LastUpdateDate'),
-                'names': result.get('names', []),
-                'emails': result.get('emails', []),
-                'addresses': result.get('addresses', []),
-                'phones': result.get('phones', []),
-                'work_relationships': result.get('workRelationships', []),
+                'names': result.get('names').get('items', []),
+                'emails': result.get('emails').get('items', []),
+                'addresses': result.get('addresses').get('items', []),
+                'phones': result.get('phones').get('items', []),
+                'work_relationships': result.get('workRelationships').get('items', []),
                 'links': result.get('links', [])
             }
 

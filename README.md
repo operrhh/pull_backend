@@ -10,7 +10,7 @@ En este repositorio se pueden encontrar todas dependencias necesarias para logra
 - [@Luciano Pino](https://github.com/LucianoPino)
 ## Instalación
 
-Crear ambiente-virtual con pip
+Crear ambiente-virtual
 
 ```bash
   py -m venv nombre-ambiente

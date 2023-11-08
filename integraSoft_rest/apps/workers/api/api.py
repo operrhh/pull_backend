@@ -30,18 +30,7 @@ def workers_hcm_api_view(request):
                     response = pagination.get_paginated_response(workers_serializer.data)
                     return Response(response.data, status = status.HTTP_200_OK)
         except Exception as e:
-            return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
-
-# @api_view(['GET'])
-# def worker_hcm_api_view(request):
-#     if request.method == 'GET':
-#         worker_service = WorkerServiceHcm()
-#         try:
-#             worker = worker_service.get_worker_hcm(request)
-#             worker_serializer = WorkerHcmSerializer(worker)
-#             return Response(worker_serializer.data, status = status.HTTP_200_OK)
-#         except Exception as e:
-#             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
+            return Response({'message': str(e)})
 
 @api_view(['PUT'])
 def worker_hcm_update_api_view(request,pk):
@@ -54,9 +43,7 @@ def worker_hcm_update_api_view(request,pk):
                 res = worker_service.update_worker_hcm(request.body, worker_serializer.data)
                 return Response(res, status = status.HTTP_200_OK)
         except Exception as e:
-            # print("Entre a la excepcion de worker_update_api_view -> message: " + str(e))
             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
-
 # endregion
 
 # region PeopleSoft
@@ -88,5 +75,4 @@ def worker_peoplesoft_api_view(request,pk):
                 return Response(worker_serializer.data, status = status.HTTP_200_OK)
         except Exception as e:
             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
-
 # endregion

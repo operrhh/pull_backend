@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 class WorkerHcmNamesSerializer(serializers.Serializer):
-    legislation_code = serializers.CharField(source='LegislationCode',max_length=5)
+    legislation_code = serializers.CharField(source='LegislationCode',max_length=10)
     last_name = serializers.CharField(source='LastName',max_length=20)
     first_name = serializers.CharField(source='FirstName',max_length=20)
     middle_names = serializers.CharField(source='MiddleNames',max_length=20)
@@ -155,8 +155,7 @@ class WorkerHcmWorkRelationshipsSerializer(serializers.Serializer):
     last_update_date = serializers.CharField(source='LastUpdateDate',max_length=20)
     projected_termination_date = serializers.CharField(source='ProjectedTerminationDate',max_length=20)
     link = serializers.SerializerMethodField()
-    assignments = WorkerHcmWorkRelationshipsAssignmentsSerializer(many=True)
-
+    assignments = WorkerHcmWorkRelationshipsAssignmentsSerializer(source='assignments.items', many=True)
     def get_link(self, obj):
         first_link = obj.get('links')[0].get('href')
         return first_link

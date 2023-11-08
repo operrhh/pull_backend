@@ -38,7 +38,10 @@ class GlobalService:
                 raise Exception(response.text) from e
         else:
             try:
+                print(url)
+                print(params)
                 response = requests.get(url, headers=headers, params=params)
+                print(response.url)
                 if response.status_code == 200:
                     return response.json()
                 else:

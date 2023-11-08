@@ -1,4 +1,5 @@
 import json
+from urllib.parse import quote
 from ...services.globalService import GlobalService
 from apps.parameters.models import Parameter, ParameterType
 from ..custom_exceptions import ExceptionJson, ExceptionWorkerHcm
@@ -12,10 +13,9 @@ class WorkerServiceHcm:
                                                                                         .filter(FilterField2='hcm')}
         self.global_service = GlobalService()
 
-    def get_workers_hcm(self):
-        params = self.params_definition()
+    def get_workers_hcm(self, request):
+        params = self.params_definition(request)
         response = self.global_service.generate_request(self.dic_url.get('worker'), params)
-
         if response:
             if response.get('count') != 0:
                 items = response.get('items')
@@ -26,22 +26,20 @@ class WorkerServiceHcm:
         else:
             raise ExceptionWorkerHcm('Error al consultar usuarios')
 
-        #This is a comment for new branch ultiiiiimo cambio
+    # def get_worker_hcm(self, request):
 
-    def get_worker_hcm(self, pk):
+    #     params = self.params_definition(request)
+    #     response = self.global_service.generate_request(self.dic_url.get('worker'), params)
 
-        params = self.params_definition(pk)
-        response = self.global_service.generate_request(self.dic_url.get('worker'), params)
-
-        if response:
-            if response.get('count') != 0:
-                items = response.get('items')[0]
-                work = self.convert_data(items)
-                return work
-            else:
-                raise ExceptionWorkerHcm('No se ha encontrado un usuario con estos datos')
-        else:
-            raise ExceptionWorkerHcm('Error al consultar usuario')
+    #     if response:
+    #         if response.get('count') != 0:
+    #             items = response.get('items')[0]
+    #             work = self.convert_data(items)
+    #             return work
+    #         else:
+    #             raise ExceptionWorkerHcm('No se ha encontrado un usuario con estos datos')
+    #     else:
+    #         raise ExceptionWorkerHcm('Error al consultar usuario')
 
     def update_worker_hcm(self, body, worker):
             try:
@@ -106,11 +104,42 @@ class WorkerServiceHcm:
             except Exception as e:
                 raise Exception(e) from e
 
-    def params_definition(self,pk = None):
+    def params_definition(self,request):
+        personNumber = request.query_params.get('personNumber', None)
+        name = request.query_params.get('name', None)
+        bussinesUnit = request.query_params.get('bussinesUnit', None)
+        department = request.query_params.get('department', None)
+
+        query_params = ''
+        conditions_added = False
+
+        if personNumber:
+            query_params += f"PersonNumber like '{personNumber}%'"
+            conditions_added = True
+        if name:
+            if conditions_added:
+                query_params += ' AND '
+            query_params += f'names.DisplayName like "%{name}%"'
+            conditions_added = True
+        if bussinesUnit:
+            if conditions_added:
+                query_params += ' AND '
+            query_params += f'workRelationships.assignments.BusinessUnitId = "{bussinesUnit}"'
+            conditions_added = True
+        if department:
+            if conditions_added:
+                query_params += ' AND '
+            query_params += f'workRelationships.assignments.DepartmentId = "{department}"'
+        print(f'Query params: {query_params}')
         params = {}
+        if query_params != '':
+            # params['q'] = query_params
+            # params['q'] = "PersonNumber='19684785-5'"
+            query_value = quote("PersonNumber like '19684785-5%'")
+            print(query_value)
+            params['q'] = query_value
+            print(f'Params: {params}')
         params['expand'] = 'names,emails,addresses,phones,workRelationships.assignments'
-        if pk:
-            params['q'] = f'PersonNumber="{pk}"'
         return params
 
     def create_worker_data(self,result):

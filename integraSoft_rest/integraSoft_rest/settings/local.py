@@ -5,7 +5,7 @@ from decouple import config
 
 # prueba SECURITY WARNING: don't run with debug turned on in production!
 # Debug no puede ser True en produccion
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["192.168.0.107", "127.0.0.1", "0.0.0.0", "web"]
 

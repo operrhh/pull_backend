@@ -20,7 +20,7 @@ def workers_hcm_api_view(request):
     if request.method == 'GET':
         worker_service = WorkerServiceHcm()
         try:
-            workers = worker_service.get_workers_hcm()
+            workers = worker_service.get_workers_hcm(request)
             if workers:
                 pagination = CustomPaginationHcm()
                 pagination.queryset = workers
@@ -32,16 +32,16 @@ def workers_hcm_api_view(request):
         except Exception as e:
             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-def worker_hcm_api_view(request,pk):
-    if request.method == 'GET':
-        worker_service = WorkerServiceHcm()
-        try:
-            worker = worker_service.get_worker_hcm(pk)
-            worker_serializer = WorkerHcmSerializer(worker)
-            return Response(worker_serializer.data, status = status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
+# @api_view(['GET'])
+# def worker_hcm_api_view(request):
+#     if request.method == 'GET':
+#         worker_service = WorkerServiceHcm()
+#         try:
+#             worker = worker_service.get_worker_hcm(request)
+#             worker_serializer = WorkerHcmSerializer(worker)
+#             return Response(worker_serializer.data, status = status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PUT'])
 def worker_hcm_update_api_view(request,pk):

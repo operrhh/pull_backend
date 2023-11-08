@@ -8,8 +8,20 @@ from ..custom_exceptions import ExceptionWorkerPeopleSoft
 
 class WorkerServicePeopleSoft:
 
+    def __init__(self):
+        self.field_names = [
+            'emplid', 'birthdate', 'birthplace', 'country_nm_format', 'name', 'name_prefix', 'last_name', 'first_name',
+            'middle_name', 'second_last_name', 'country', 'address1', 'address2', 'address3', 'address4', 'city',
+            'county', 'state', 'home_phone', 'national_id_type', 'national_id', 'sex', 'mar_status', 'highest_educ_lvl',
+            'orig_hire_dt', 'per_org', 'cmpny_seniority_dt', 'service_dt', 'last_increase_dt', 'business_title',
+            'effdt', 'hire_dt', 'supervisor_id', 'business_unit', 'business_unit_descr', 'deptid','dept_descr', 'jobcode', 'action',
+            'action_dt', 'action_reason', 'location', 'job_entry_dt', 'dept_entry_dt', 'reg_temp', 'full_part_time',
+            'company', 'paygroup', 'empl_type', 'holiday_schedule', 'std_hours', 'reg_region', 'jobtitle', 'jobtitle_abbrv',
+            'deptname', 'deptname_abbrv', 'rehire_dt', 'work_phone', 'nid_country'
+        ]
+
     def get_workers_peoplesoft(self, request):
-        
+
         emplid = request.query_params.get('emplid', None)
         name = request.query_params.get('name', None)
         bussines_unit = request.query_params.get('bussines_unit', None)
@@ -46,19 +58,18 @@ class WorkerServicePeopleSoft:
         except cx_Oracle.DatabaseError as e:
             print('Error de la base de datos:', e)
 
+    def update_worker_peoplesoft(self, request):
+        # Crear un diccionario con los nombres de los atributos y sus valores
+        params = {field: request.data.get(field, None) for field in self.field_names}
+        try:
+            with connections['people_soft'].cursor() as cursor:
+                cursor.callproc("SP_INSERT_WORKER", [[params[param] for param in self.field_names]])
+        except cx_Oracle.DatabaseError as e:
+            print('Error de la base de datos:', e)
+
     def create_worker_data(self, data):
-        field_names = [
-            'emplid', 'birthdate', 'birthplace', 'country_nm_format', 'name', 'name_prefix', 'last_name', 'first_name',
-            'middle_name', 'second_last_name', 'country', 'address1', 'address2', 'address3', 'address4', 'city',
-            'county', 'state', 'home_phone', 'national_id_type', 'national_id', 'sex', 'mar_status', 'highest_educ_lvl',
-            'orig_hire_dt', 'per_org', 'cmpny_seniority_dt', 'service_dt', 'last_increase_dt', 'business_title',
-            'effdt', 'hire_dt', 'supervisor_id', 'business_unit', 'business_unit_descr', 'deptid','dept_descr', 'jobcode', 'action',
-            'action_dt', 'action_reason', 'location', 'job_entry_dt', 'dept_entry_dt', 'reg_temp', 'full_part_time',
-            'company', 'paygroup', 'empl_type', 'holiday_schedule', 'std_hours', 'reg_region', 'jobtitle', 'jobtitle_abbrv',
-            'deptname', 'deptname_abbrv', 'rehire_dt', 'work_phone', 'nid_country'
-        ]
         worker_data = {}
-        for i, field_name in enumerate(field_names):
+        for i, field_name in enumerate(self.field_names):
             if not self.validate_none(data[i]):
                 if field_name in ['birthdate', 'birthplace', 'orig_hire_dt', 'cmpny_seniority_dt', 'service_dt',
                                   'last_increase_dt', 'effdt', 'hire_dt', 'action_dt', 'job_entry_dt', 'dept_entry_dt'] and not isinstance(data[i], str):

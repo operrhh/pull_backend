@@ -1,7 +1,8 @@
 import json
 from ...services.globalService import GlobalService
-from apps.parameters.models import Parameter, ParameterType
 from ..custom_exceptions import ExceptionJson, ExceptionWorkerHcm
+from apps.parameters.models import Parameter, ParameterType
+from apps.utils import log_entry
 
 class WorkerServiceHcm:
     def __init__(self):

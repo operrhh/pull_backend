@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.parameters.models import Parameter, ParameterType
+from .models import Parameter, ParameterType
 
 # Register your models here.
 admin.site.register(Parameter)

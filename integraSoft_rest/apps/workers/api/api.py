@@ -1,7 +1,10 @@
 #Librerias
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 
 #Paginations
 from ..pagination import CustomPaginationPeopleSoft, CustomPaginationHcm
@@ -16,6 +19,8 @@ from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 
 # region HCM
 @api_view(['GET','POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def workers_hcm_api_view(request):
     if request.method == 'GET':
         worker_service = WorkerServiceHcm()
@@ -50,6 +55,8 @@ def worker_hcm_update_api_view(request,pk):
 @api_view(['GET'])
 def workers_peoplesoft_api_view(request):
     if request.method == 'GET':
+        print(request.user)
+        print(request.META.get('HTTP_AUTHORIZATION', '').split(' ')[1])        
         worker_service = WorkerServicePeopleSoft()
         try:
             workers = worker_service.get_workers_peoplesoft(request)

@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
 
-        # Generamos la encriptación de la contraseña al momento de crear el usuario
+        # Generamos la encriptación de la contraseña al momento de crear el usuario (utf8mb4)
         user = User(**validated_data)
         user.set_password(validated_data['password'])
         user.save()
@@ -32,3 +32,7 @@ class UserListSerializer(serializers.ModelSerializer):
             'email': instance['email'],
             'password': instance['password'],
         }
+
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)

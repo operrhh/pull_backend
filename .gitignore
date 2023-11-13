@@ -3,3 +3,6 @@ venv
 *.pot
 *.pyc
 __pycache__/
+
+# Ignore Django migrations
+**/migrations/

@@ -25,14 +25,14 @@ DATABASES = {
         'HOST': config('DB_DEFAULT_HOST'),
         'PORT': config('DB_DEFAULT_PORT')
     },
-    # 'people_soft': {
-    #     'ENGINE': ENGINE,
-    #     'NAME': config('DB_PEOPLE_SOFT_NAME'),
-    #     'USER': config('DB_PEOPLE_SOFT_USER'),
-    #     'PASSWORD': config('DB_PEOPLE_SOFT_PASSWORD'),
-    #     'HOST': config('DB_PEOPLE_SOFT_HOST'),
-    #     'PORT': config('DB_PEOPLE_SOFT_PORT')
-    # }
+    'people_soft': {
+        'ENGINE': ENGINE,
+        'NAME': config('DB_PEOPLE_SOFT_NAME'),
+        'USER': config('DB_PEOPLE_SOFT_USER'),
+        'PASSWORD': config('DB_PEOPLE_SOFT_PASSWORD'),
+        'HOST': config('DB_PEOPLE_SOFT_HOST'),
+        'PORT': config('DB_PEOPLE_SOFT_PORT')
+    }
 }
 
 # Static files (CSS, JavaScript, Images)

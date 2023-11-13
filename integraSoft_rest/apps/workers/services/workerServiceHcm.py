@@ -17,6 +17,7 @@ class WorkerServiceHcm:
         params = self.params_definition(request)
         response = self.global_service.generate_request(self.dic_url.get('worker'), params)
         if response:
+            log_entry(request.user, 'INFO', 'Se obtienen los trabajadores de HCM desde workerServiceHcm')
             if response.get('count') != 0:
                 items = response.get('items')               
                 workers = self.convert_data(items)
@@ -115,12 +116,10 @@ class WorkerServiceHcm:
             if conditions_added:
                 query_params += ' AND '
             query_params += f'workRelationships.assignments.DepartmentId = {department}'
-        print(f'Query params: {query_params}')
         params = {}
         if query_params != '':
             params['q'] = query_params
         params['expand'] = 'names,emails,addresses,phones,workRelationships.assignments'
-        print(f'Params: {params}')
 
         return params
 

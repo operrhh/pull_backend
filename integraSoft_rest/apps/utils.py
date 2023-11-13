@@ -1,9 +1,8 @@
 from apps.logs.models import LogEntry
-from django.contrib.auth.decorators import login_required
 
-@login_required
 def log_entry(user, level, message):
     try:
+        print("User: " + user.username + " - Level: " + level + " - Message: " + message)
         LogEntry.objects.create(
             user=user,
             level=level,

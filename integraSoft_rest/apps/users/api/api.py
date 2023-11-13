@@ -19,8 +19,6 @@ from apps.users.api.serializers import UserSerializer, UserListSerializer, UserL
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAdminUser])
 def user_api_view(request):
-    print(request.META.get('HTTP_AUTHORIZATION', ''))
-    print(request.user)
     if request.method == 'GET':
         users = User.objects.values('id','username','email','password')
         users_serializer = UserListSerializer(users, many=True)

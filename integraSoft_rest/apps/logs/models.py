@@ -8,4 +8,4 @@ class LogEntry(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.timestamp} - {self.level} - {self.user} - {self.message}'
+        return f'{self.timestamp} - {self.level} - {self.user.username} - {self.message}'

@@ -25,6 +25,7 @@ class GlobalService:
         headers = {
             "Authorization": f"Basic {encoded_credentials}",
             "Content-Type": "application/vnd.oracle.adf.resourceitem+json",
+            "REST-Framework-Version": "4",
         }
         if body_data:
             headers['Effective-of'] = "RangeMode=UPDATE;RangeStartDate=2023-08-04;RangeEndDate=2024-09-01"
@@ -39,6 +40,7 @@ class GlobalService:
         else:
             try:
                 response = requests.get(url, headers=headers, params=params)
+                print(response.url)
                 if response.status_code == 200:
                     return response.json()
                 else:

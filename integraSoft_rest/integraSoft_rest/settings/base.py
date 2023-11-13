@@ -31,16 +31,25 @@ LOCAL_APPS = [
     'apps.users',
     'apps.workers',
     'apps.parameters',
+    'apps.logs',
 ]
 
 THIRD_APPS = [
     'rest_framework',
+    'rest_framework.authtoken',
     'requests',
     'cx_Oracle',
     'simple_history'
 ]
 
 INSTALLED_APPS =  BASE_APPS + LOCAL_APPS + THIRD_APPS
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    # 'DEFAULT_TOKEN_AGE': timedelta(days=1),  # Duración del token
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

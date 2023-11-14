@@ -2,7 +2,6 @@ import json
 from ...services.globalService import GlobalService
 from ..custom_exceptions import ExceptionJson, ExceptionWorkerHcm
 from apps.parameters.models import Parameter, ParameterType
-from apps.utils import log_entry
 
 class WorkerServiceHcm:
     def __init__(self):
@@ -17,7 +16,6 @@ class WorkerServiceHcm:
         params = self.params_definition(request)
         response = self.global_service.generate_request(self.dic_url.get('worker'), params)
         if response:
-            log_entry(request.user, 'INFO', 'Se obtienen los trabajadores de HCM desde workerServiceHcm')
             if response.get('count') != 0:
                 items = response.get('items')               
                 workers = self.convert_data(items)

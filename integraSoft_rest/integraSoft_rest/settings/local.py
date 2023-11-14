@@ -15,29 +15,34 @@ ALLOWED_HOSTS = []
 ENGINE = 'django.db.backends.oracle'
 
 # Leer variables de entorno
-oracle_host = config('DB_DEFAULT_HOST')
-oracle_port = config('DB_DEFAULT_PORT')
-oracle_service_name = config('DB_DEFAULT_NAME')
-oracle_user = config('DB_DEFAULT_USER')
-oracle_password = config('DB_DEFAULT_PASSWORD')
+oci_host = config('DB_DEFAULT_HOST')
+oci_port = config('DB_DEFAULT_PORT')
+oci_service_name = config('DB_DEFAULT_NAME')
+oci_user = config('DB_DEFAULT_USER')
+oci_password = config('DB_DEFAULT_PASSWORD')
 
-# Construir la cadena DSN
-dsn = makedsn(oracle_host, oracle_port, service_name=oracle_service_name)
+people_host = config('DB_PEOPLE_SOFT_HOST')
+people_port = config('DB_PEOPLE_SOFT_PORT')
+people_service_name = config('DB_PEOPLE_SOFT_NAME')
+people_user = config('DB_PEOPLE_SOFT_USER')
+people_password = config('DB_PEOPLE_SOFT_PASSWORD')
+
+oci_dsn = makedsn(oci_host, oci_port, service_name=oci_service_name)
+people_dsn = makedsn(people_host, people_port, service_name=people_service_name)
+
 
 DATABASES = {
     'default': {
         'ENGINE': ENGINE,
-        'NAME': dsn,
-        'USER': oracle_user,
-        'PASSWORD': oracle_password,
+        'NAME': oci_dsn,
+        'USER': oci_user,
+        'PASSWORD': oci_password,
     },
    'people_soft': {
        'ENGINE': ENGINE,
-       'NAME': config('DB_PEOPLE_SOFT_NAME'),
-       'USER': config('DB_PEOPLE_SOFT_USER'),
-       'PASSWORD': config('DB_PEOPLE_SOFT_PASSWORD'),
-       'HOST': config('DB_PEOPLE_SOFT_HOST'),
-       'PORT': config('DB_PEOPLE_SOFT_PORT')
+       'NAME': people_dsn,
+       'USER': people_user,
+       'PASSWORD': people_password,
    }
 }
 

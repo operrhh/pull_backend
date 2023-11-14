@@ -6,7 +6,7 @@ from cx_Oracle import makedsn
 # prueba SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["192.168.0.107", "127.0.0.1", "0.0.0.0", "web"]
+ALLOWED_HOSTS = ['192.168.0.107','0.0.0.0','127.0.0.1','localhost','web', '168.138.71.27', '129.151.110.152']
 
 # Database conex
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

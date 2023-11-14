@@ -16,7 +16,6 @@ from .serializers import WorkerHcmSerializer, WorkerPeopleSoftSerializer
 from ..services.workerServiceHcm import WorkerServiceHcm
 from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 
-
 # region HCM
 @api_view(['GET','POST'])
 @authentication_classes([TokenAuthentication])

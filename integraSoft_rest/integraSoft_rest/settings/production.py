@@ -8,7 +8,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["192.168.0.107", "127.0.0.1", "0.0.0.0", "web"]
 
-# Database
+# Database conex
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 ENGINE = 'django.db.backends.oracle'

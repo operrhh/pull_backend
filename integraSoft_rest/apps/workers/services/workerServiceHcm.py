@@ -11,19 +11,22 @@ class WorkerServiceHcm:
                                                                                         .filter(FilterField1='url')
                                                                                         .filter(FilterField2='hcm')}
         self.global_service = GlobalService()
+        self.has_more = True
 
     def get_workers_hcm(self, request):
         params = self.params_definition(request)
-        response = self.global_service.generate_request(self.dic_url.get('worker'), params)
-        if response:
-            if response.get('count') != 0:
-                items = response.get('items')               
-                workers = self.convert_data(items)
-                return workers
+        while self.has_more:
+            params = self.pagination_definition(params)
+            response = self.global_service.generate_request(self.dic_url.get('worker'), params)
+            if response:
+                if response.get('count') != 0:
+                    items = response.get('items')
+                else:
+                    raise ExceptionWorkerHcm('No se han encontrado usuarios')
             else:
-                raise ExceptionWorkerHcm('No se han encontrado usuarios')
-        else:
-            raise ExceptionWorkerHcm('Error al consultar usuarios')
+                raise ExceptionWorkerHcm('Error al consultar usuarios')
+        workers = self.convert_data(items)
+        return workers
 
     def update_worker_hcm(self, body, worker):
             try:
@@ -80,17 +83,46 @@ class WorkerServiceHcm:
                         response = self.global_service.generate_request(link_workrelationship, body_data=workrelationship_json)
                         if response:
                             print("workRelationship actualizado correctamente")                
-                
+
+                if 'phones' in body_json and len(worker.get('phones')) > 0:
+                    for phone_json in body_json['phones']:
+                            for phone_worker in worker.get('phones'):
+                                if phone_json.get('idPhone') == phone_worker.get('phone_id'):
+                                    link_phone = phone_worker.get('link')
+                                    response = self.global_service.generate_request(link_phone, body_data=phone_json.get('content'))
+                                    if response:
+                                        print("Phone actualizado correctamente")
+                elif 'phones' in body_json and not worker.get('phones'):
+                    link_phone = worker.get('phones')[0].get('link')
+                    phone_json = body_json['phones'][0]
+                    response = self.global_service.generate_request(link_phone, body_data=phone_json)
+                    if response:
+                        print("Phone actualizado correctamente")
+
                 # if 'phones' in body_json:
+                #     for phone_json in body_json['phones']:
+                #         for phone_worker in worker.get('phones'):
+                #             if phone_json.get('idPhone') == phone_worker.get('phone_id'):
+                #                 link_phone = phone_worker.get('link')
+                #                 response = self.global_service.generate_request(link_phone, body_data=phone_json.get('content'))
+                #                 if response:
+                #                     print("Phone actualizado correctamente")
 
                 return {'message': 'Worker actualizado correctamente'}
 
             except Exception as e:
                 raise Exception(e) from e
 
+    def create_worker_hcm(self, body):
+        try:
+            print(body)
+        except Exception as e:
+            raise Exception(e) from e
+
     def params_definition(self,request):
         person_number = request.query_params.get('personNumber', None)
         name = request.query_params.get('name', None)
+        last_name = request.query_params.get('lastName', None)
         bussines_unit = request.query_params.get('bussinesUnit', None)
         department = request.query_params.get('department', None)
 
@@ -103,7 +135,12 @@ class WorkerServiceHcm:
         if name:
             if conditions_added:
                 query_params += ' AND '
-            query_params += f"upper(names.DisplayName) like '%{name.upper()}%'"
+            query_params += f"upper(names.FirstName) like '%{name.upper()}%'"
+            conditions_added = True
+        if last_name:
+            if conditions_added:
+                query_params += ' AND '
+            query_params += f"upper(names.LastName) like '%{last_name.upper()}%'"
             conditions_added = True
         if bussines_unit:
             if conditions_added:
@@ -116,8 +153,15 @@ class WorkerServiceHcm:
             query_params += f'workRelationships.assignments.DepartmentId = {department}'
         params = {}
         if query_params != '':
+            print(query_params)
             params['q'] = query_params
         params['expand'] = 'names,emails,addresses,phones,workRelationships.assignments'
+
+        return params
+
+    def pagination_definition(self,params):
+        params['limit'] = 25
+        params['offset'] = 0
 
         return params
 

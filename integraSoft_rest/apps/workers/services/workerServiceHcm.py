@@ -12,21 +12,44 @@ class WorkerServiceHcm:
                                                                                         .filter(FilterField2='hcm')}
         self.global_service = GlobalService()
         self.has_more = True
+        self.workers_list = []
+        self.limit = 10
+        self.offset = 0
+        self.cont_limit = self.limit
 
     def get_workers_hcm(self, request):
         params = self.params_definition(request)
-        while self.has_more:
-            params = self.pagination_definition(params)
-            response = self.global_service.generate_request(self.dic_url.get('worker'), params)
-            if response:
-                if response.get('count') != 0:
-                    items = response.get('items')
-                else:
-                    raise ExceptionWorkerHcm('No se han encontrado usuarios')
+        # while self.has_more:
+        #     params = self.pagination_definition(params)
+        #     response = self.global_service.generate_request(self.dic_url.get('worker'), params)
+        #     if response:
+        #         if response.get('count') != 0:
+        #             items = response.get('items')
+        #             self.has_more = response.get('hasMore')
+        #             self.offset = self.cont_limit
+        #             self.cont_limit = self.cont_limit + self.limit
+        #             for item in items:
+        #                 self.workers_list.append(item)
+        #         else:
+        #             raise ExceptionWorkerHcm('No se han encontrado worker')
+        #     else:
+        #         raise ExceptionWorkerHcm('Error al consultar workers')
+
+        response = self.global_service.generate_request(self.dic_url.get('worker'), params)
+        if response:
+            if response.get('count') != 0:
+                items = response.get('items')
+                workers = self.convert_data(items)
+                for worker in workers:
+                    for work_relationship in worker.get('work_relationships'):
+                        if work_relationship.get('assignments'):
+                            work_relationship['assignments'][0]['BusinessUnitId'] = self.get_centro_costo_hcm(work_relationship['assignments'][0]['DepartmentId'])
+                return workers
             else:
-                raise ExceptionWorkerHcm('Error al consultar usuarios')
-        workers = self.convert_data(items)
-        return workers
+                raise ExceptionWorkerHcm('No se han encontrado worker')
+        else:
+            raise ExceptionWorkerHcm('Error al consultar workers')
+
 
     def update_worker_hcm(self, body, worker):
             try:
@@ -119,6 +142,20 @@ class WorkerServiceHcm:
         except Exception as e:
             raise Exception(e) from e
 
+    def get_centro_costo_hcm(self,department_id):
+        params = {}
+        params['q'] = f"departmentsEFF.CategoryCode='DEPARTMENT' and OrganizationId={department_id}"
+        params['expand'] = 'departmentsDFF'
+        response = self.global_service.generate_request(self.dic_url.get('department'),params=params)
+        if response:
+            if response.get('count') != 0:
+                items = response.get('items')[0]
+                department_dff = items.get('departmentsDFF').get('items')[0]
+                centro_costo = department_dff.get('ccuCodigoCentroCosto')
+                return centro_costo
+            else:
+                raise ExceptionWorkerHcm('No se han encontrado departamentos')
+
     def params_definition(self,request):
         person_number = request.query_params.get('personNumber', None)
         name = request.query_params.get('name', None)
@@ -160,9 +197,8 @@ class WorkerServiceHcm:
         return params
 
     def pagination_definition(self,params):
-        params['limit'] = 25
-        params['offset'] = 0
-
+        params['limit'] = self.cont_limit
+        params['offset'] = self.offset
         return params
 
     def create_worker_data(self,result):

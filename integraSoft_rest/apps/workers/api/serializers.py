@@ -105,7 +105,7 @@ class WorkerHcmWorkRelationshipsAssignmentsSerializer(serializers.Serializer):
     job_id = serializers.CharField(source='JobId',max_length=20)
     job_code = serializers.CharField(source='JobCode',max_length=20)
     department_id = serializers.CharField(source='DepartmentId',max_length=20)
-    department_name = serializers.CharField(source='DepartmentName',max_length=20)
+    department_name = serializers.CharField(source='DepartmentName',max_length=100)
     # location_id = serializers.CharField(source='LocationId',max_length=20)
     # location_code = serializers.CharField(source='LocationCode',max_length=20)
     # work_at_home_flag = serializers.CharField(source='WorkAtHomeFlag',max_length=20)

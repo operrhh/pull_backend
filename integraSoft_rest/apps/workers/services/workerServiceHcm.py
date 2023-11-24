@@ -19,37 +19,16 @@ class WorkerServiceHcm:
 
     def get_workers_hcm(self, request):
         params = self.params_definition(request)
-        # while self.has_more:
-        #     params = self.pagination_definition(params)
-        #     response = self.global_service.generate_request(self.dic_url.get('worker'), params)
-        #     if response:
-        #         if response.get('count') != 0:
-        #             items = response.get('items')
-        #             self.has_more = response.get('hasMore')
-        #             self.offset = self.cont_limit
-        #             self.cont_limit = self.cont_limit + self.limit
-        #             for item in items:
-        #                 self.workers_list.append(item)
-        #         else:
-        #             raise ExceptionWorkerHcm('No se han encontrado worker')
-        #     else:
-        #         raise ExceptionWorkerHcm('Error al consultar workers')
-
         response = self.global_service.generate_request(self.dic_url.get('worker'), params)
         if response:
             if response.get('count') != 0:
                 items = response.get('items')
                 workers = self.convert_data(items)
-                for worker in workers:
-                    for work_relationship in worker.get('work_relationships'):
-                        if work_relationship.get('assignments'):
-                            work_relationship['assignments'][0]['BusinessUnitId'] = self.get_centro_costo_hcm(work_relationship['assignments'][0]['DepartmentId'])
                 return workers
             else:
                 raise ExceptionWorkerHcm('No se han encontrado worker')
         else:
             raise ExceptionWorkerHcm('Error al consultar workers')
-
 
     def update_worker_hcm(self, body, worker):
             try:
@@ -202,7 +181,7 @@ class WorkerServiceHcm:
         return params
 
     def create_worker_data(self,result):
-        return {
+        worker_data: dict = {
                 'person_id': result.get('PersonId'),
                 'person_number': result.get('PersonNumber'),
                 'date_of_birth': result.get('DateOfBirth'),
@@ -218,9 +197,21 @@ class WorkerServiceHcm:
                 'emails': result.get('emails').get('items', []),
                 'addresses': result.get('addresses').get('items', []),
                 'phones': result.get('phones').get('items', []),
-                'work_relationships': result.get('workRelationships').get('items', []),
+                'work_relationships': [], # Realizamos un trabajo adicional para obtener los assignments
                 'links': result.get('links', [])
             }
+
+        work_relationships = result.get('workRelationships', {}).get('items', [])
+
+        for relationship in work_relationships:
+            assignments = relationship.get('assignments', {}).get('items', [])
+            department_id = assignments[0]['DepartmentId']
+            centro_costo = self.get_centro_costo_hcm(department_id)
+            assignments[0]['CcuCodigoCentroCosto'] = centro_costo
+            relationship['assignments'] = assignments
+            worker_data['work_relationships'].append(relationship)
+        
+        return worker_data
 
     def convert_data(self,data):
         if isinstance(data, list):

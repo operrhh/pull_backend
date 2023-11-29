@@ -11,6 +11,7 @@ class WorkerServiceHcm:
                                                                                         .filter(FilterField1='url')
                                                                                         .filter(FilterField2='hcm')}
         self.global_service = GlobalService()
+        self.dic_centro_costo = {}
         self.has_more = True
         self.workers_list = []
         self.limit = 10
@@ -131,9 +132,14 @@ class WorkerServiceHcm:
                 items = response.get('items')[0]
                 department_dff = items.get('departmentsDFF').get('items')[0]
                 centro_costo = department_dff.get('ccuCodigoCentroCosto')
+                self.insert_centro_costo_dic(department_id,centro_costo)
                 return centro_costo
             else:
-                raise ExceptionWorkerHcm('No se han encontrado departamentos')
+                raise ExceptionWorkerHcm('No se han encontrado departamentos')       
+
+    def insert_centro_costo_dic(self,department_id,centro_costo):
+        self.dic_centro_costo[department_id] = centro_costo
+        #print(self.dic_centro_costo)
 
     def params_definition(self,request):
         person_number = request.query_params.get('personNumber', None)
@@ -172,6 +178,8 @@ class WorkerServiceHcm:
             print(query_params)
             params['q'] = query_params
         params['expand'] = 'names,emails,addresses,phones,workRelationships.assignments'
+        #params['onlyData'] = 'true'
+        # params['limit'] = 5
 
         return params
 
@@ -206,7 +214,9 @@ class WorkerServiceHcm:
         for relationship in work_relationships:
             assignments = relationship.get('assignments', {}).get('items', [])
             department_id = assignments[0]['DepartmentId']
-            centro_costo = self.get_centro_costo_hcm(department_id)
+            centro_costo = self.dic_centro_costo.get(department_id)
+            if not centro_costo:
+                centro_costo = self.get_centro_costo_hcm(department_id)
             assignments[0]['CcuCodigoCentroCosto'] = centro_costo
             relationship['assignments'] = assignments
             worker_data['work_relationships'].append(relationship)

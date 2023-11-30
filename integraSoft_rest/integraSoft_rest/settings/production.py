@@ -38,12 +38,12 @@ DATABASES = {
         'USER': OCI_USER,
         'PASSWORD': OCI_PASSWORD,
     },
-#    'people_soft': {
-#        'ENGINE': ENGINE,
-#        'NAME': PEOPLE_DSN,
-#        'USER': PEOPLE_USER,
-#        'PASSWORD': PEOPLE_PASSWORD,
-#    }
+   'people_soft': {
+       'ENGINE': ENGINE,
+       'NAME': PEOPLE_DSN,
+       'USER': PEOPLE_USER,
+       'PASSWORD': PEOPLE_PASSWORD,
+   }
 }
 
 # Static files (CSS, JavaScript, Images)

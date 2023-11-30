@@ -11,19 +11,25 @@ class WorkerServiceHcm:
                                                                                         .filter(FilterField1='url')
                                                                                         .filter(FilterField2='hcm')}
         self.global_service = GlobalService()
+        self.dic_centro_costo = {}
+        self.has_more = True
+        self.workers_list = []
+        self.limit = 10
+        self.offset = 0
+        self.cont_limit = self.limit
 
     def get_workers_hcm(self, request):
         params = self.params_definition(request)
         response = self.global_service.generate_request(self.dic_url.get('worker'), params)
         if response:
             if response.get('count') != 0:
-                items = response.get('items')               
+                items = response.get('items')
                 workers = self.convert_data(items)
                 return workers
             else:
-                raise ExceptionWorkerHcm('No se han encontrado usuarios')
+                raise ExceptionWorkerHcm('No se han encontrado worker')
         else:
-            raise ExceptionWorkerHcm('Error al consultar usuarios')
+            raise ExceptionWorkerHcm('Error al consultar workers')
 
     def update_worker_hcm(self, body, worker):
             try:
@@ -80,18 +86,65 @@ class WorkerServiceHcm:
                         response = self.global_service.generate_request(link_workrelationship, body_data=workrelationship_json)
                         if response:
                             print("workRelationship actualizado correctamente")                
-                
+
+                if 'phones' in body_json and len(worker.get('phones')) > 0:
+                    for phone_json in body_json['phones']:
+                            for phone_worker in worker.get('phones'):
+                                if phone_json.get('idPhone') == phone_worker.get('phone_id'):
+                                    link_phone = phone_worker.get('link')
+                                    response = self.global_service.generate_request(link_phone, body_data=phone_json.get('content'))
+                                    if response:
+                                        print("Phone actualizado correctamente")
+                elif 'phones' in body_json and not worker.get('phones'):
+                    link_phone = worker.get('phones')[0].get('link')
+                    phone_json = body_json['phones'][0]
+                    response = self.global_service.generate_request(link_phone, body_data=phone_json)
+                    if response:
+                        print("Phone actualizado correctamente")
+
                 # if 'phones' in body_json:
+                #     for phone_json in body_json['phones']:
+                #         for phone_worker in worker.get('phones'):
+                #             if phone_json.get('idPhone') == phone_worker.get('phone_id'):
+                #                 link_phone = phone_worker.get('link')
+                #                 response = self.global_service.generate_request(link_phone, body_data=phone_json.get('content'))
+                #                 if response:
+                #                     print("Phone actualizado correctamente")
 
                 return {'message': 'Worker actualizado correctamente'}
 
             except Exception as e:
                 raise Exception(e) from e
 
+    def create_worker_hcm(self, body):
+        try:
+            print(body)
+        except Exception as e:
+            raise Exception(e) from e
+
+    def get_centro_costo_hcm(self,department_id):
+        params = {}
+        params['q'] = f"departmentsEFF.CategoryCode='DEPARTMENT' and OrganizationId={department_id}"
+        params['expand'] = 'departmentsDFF'
+        response = self.global_service.generate_request(self.dic_url.get('department'),params=params)
+        if response:
+            if response.get('count') != 0:
+                items = response.get('items')[0]
+                department_dff = items.get('departmentsDFF').get('items')[0]
+                centro_costo = department_dff.get('ccuCodigoCentroCosto')
+                self.insert_centro_costo_dic(department_id,centro_costo)
+                return centro_costo
+            else:
+                raise ExceptionWorkerHcm('No se han encontrado departamentos')       
+
+    def insert_centro_costo_dic(self,department_id,centro_costo):
+        self.dic_centro_costo[department_id] = centro_costo
+        #print(self.dic_centro_costo)
+
     def params_definition(self,request):
         person_number = request.query_params.get('personNumber', None)
-        name = request.query_params.get('name', None)
-        bussines_unit = request.query_params.get('bussinesUnit', None)
+        first_name = request.query_params.get('firstName', None)
+        last_name = request.query_params.get('lastName', None)
         department = request.query_params.get('department', None)
 
         query_params = ''
@@ -100,15 +153,15 @@ class WorkerServiceHcm:
         if person_number:
             query_params += f"PersonNumber like '{person_number}%'"
             conditions_added = True
-        if name:
+        if first_name:
             if conditions_added:
                 query_params += ' AND '
-            query_params += f"upper(names.DisplayName) like '%{name.upper()}%'"
+            query_params += f"upper(names.FirstName) like '%{first_name.upper()}%'"
             conditions_added = True
-        if bussines_unit:
+        if last_name:
             if conditions_added:
                 query_params += ' AND '
-            query_params += f'workRelationships.assignments.BusinessUnitId = {bussines_unit}'
+            query_params += f"upper(names.LastName) like '%{last_name.upper()}%'"
             conditions_added = True
         if department:
             if conditions_added:
@@ -116,13 +169,21 @@ class WorkerServiceHcm:
             query_params += f'workRelationships.assignments.DepartmentId = {department}'
         params = {}
         if query_params != '':
+            #print(query_params)
             params['q'] = query_params
         params['expand'] = 'names,emails,addresses,phones,workRelationships.assignments'
+        #params['onlyData'] = 'true'
+        params['limit'] = 10
 
         return params
 
+    def pagination_definition(self,params):
+        params['limit'] = self.cont_limit
+        params['offset'] = self.offset
+        return params
+
     def create_worker_data(self,result):
-        return {
+        worker_data: dict = {
                 'person_id': result.get('PersonId'),
                 'person_number': result.get('PersonNumber'),
                 'date_of_birth': result.get('DateOfBirth'),
@@ -138,9 +199,26 @@ class WorkerServiceHcm:
                 'emails': result.get('emails').get('items', []),
                 'addresses': result.get('addresses').get('items', []),
                 'phones': result.get('phones').get('items', []),
-                'work_relationships': result.get('workRelationships').get('items', []),
+                'work_relationships': [], # Realizamos un trabajo adicional para obtener los assignments
                 'links': result.get('links', [])
             }
+
+        work_relationships = result.get('workRelationships', {}).get('items', [])
+
+        for relationship in work_relationships:
+            assignments = relationship.get('assignments', {}).get('items', [])
+            department_id = assignments[0]['DepartmentId']
+            if not department_id:
+                centro_costo = None
+            else:
+                centro_costo = self.dic_centro_costo.get(department_id)
+                if not centro_costo:
+                    centro_costo = self.get_centro_costo_hcm(department_id)
+            assignments[0]['CcuCodigoCentroCosto'] = centro_costo
+            relationship['assignments'] = assignments
+            worker_data['work_relationships'].append(relationship)
+        
+        return worker_data
 
     def convert_data(self,data):
         if isinstance(data, list):

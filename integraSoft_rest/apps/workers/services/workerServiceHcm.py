@@ -143,9 +143,8 @@ class WorkerServiceHcm:
 
     def params_definition(self,request):
         person_number = request.query_params.get('personNumber', None)
-        name = request.query_params.get('name', None)
+        first_name = request.query_params.get('firstName', None)
         last_name = request.query_params.get('lastName', None)
-        bussines_unit = request.query_params.get('bussinesUnit', None)
         department = request.query_params.get('department', None)
 
         query_params = ''
@@ -154,20 +153,15 @@ class WorkerServiceHcm:
         if person_number:
             query_params += f"PersonNumber like '{person_number}%'"
             conditions_added = True
-        if name:
+        if first_name:
             if conditions_added:
                 query_params += ' AND '
-            query_params += f"upper(names.FirstName) like '%{name.upper()}%'"
+            query_params += f"upper(names.FirstName) like '%{first_name.upper()}%'"
             conditions_added = True
         if last_name:
             if conditions_added:
                 query_params += ' AND '
             query_params += f"upper(names.LastName) like '%{last_name.upper()}%'"
-            conditions_added = True
-        if bussines_unit:
-            if conditions_added:
-                query_params += ' AND '
-            query_params += f'workRelationships.assignments.BusinessUnitId = {bussines_unit}'
             conditions_added = True
         if department:
             if conditions_added:
@@ -175,11 +169,11 @@ class WorkerServiceHcm:
             query_params += f'workRelationships.assignments.DepartmentId = {department}'
         params = {}
         if query_params != '':
-            print(query_params)
+            #print(query_params)
             params['q'] = query_params
         params['expand'] = 'names,emails,addresses,phones,workRelationships.assignments'
         #params['onlyData'] = 'true'
-        # params['limit'] = 5
+        params['limit'] = 10
 
         return params
 
@@ -214,9 +208,12 @@ class WorkerServiceHcm:
         for relationship in work_relationships:
             assignments = relationship.get('assignments', {}).get('items', [])
             department_id = assignments[0]['DepartmentId']
-            centro_costo = self.dic_centro_costo.get(department_id)
-            if not centro_costo:
-                centro_costo = self.get_centro_costo_hcm(department_id)
+            if not department_id:
+                centro_costo = None
+            else:
+                centro_costo = self.dic_centro_costo.get(department_id)
+                if not centro_costo:
+                    centro_costo = self.get_centro_costo_hcm(department_id)
             assignments[0]['CcuCodigoCentroCosto'] = centro_costo
             relationship['assignments'] = assignments
             worker_data['work_relationships'].append(relationship)

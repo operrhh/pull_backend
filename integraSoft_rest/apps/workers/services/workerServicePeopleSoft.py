@@ -25,13 +25,12 @@ class WorkerServicePeopleSoft:
         person_number = request.query_params.get('personNumber', None)
         first_name = request.query_params.get('name', None)
         last_name = request.query_params.get('lastName', None)
-        bussines_unit = request.query_params.get('bussinesUnit', None)
         department = request.query_params.get('department', None)
 
         try:
             with connections['people_soft'].cursor() as cursor:
                 out_cur = cursor.connection.cursor()
-                cursor.callproc("SP_GET_WORKERS", [out_cur, person_number, first_name, last_name, bussines_unit, department])
+                cursor.callproc("SP_GET_WORKERS", [out_cur, person_number, first_name, last_name, department])
                 if out_cur:
                     items = [res for res in out_cur]
                     if len(items) > 0:

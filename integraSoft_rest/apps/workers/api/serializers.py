@@ -129,6 +129,7 @@ class WorkerHcmWorkRelationshipsAssignmentsSerializer(serializers.Serializer):
     last_updated_by = serializers.CharField(source='LastUpdatedBy',max_length=20)
     last_update_date = serializers.CharField(source='LastUpdateDate',max_length=20)
     ccu_codigo_centro_costo = serializers.CharField(source='CcuCodigoCentroCosto',max_length=20)
+    salary_amount = serializers.CharField(source='SalaryAmount',max_length=20)
     link = serializers.SerializerMethodField()
 
     def get_link(self, obj):
@@ -185,6 +186,17 @@ class WorkerHcmSerializer(serializers.Serializer):
         first_link = obj.get('links')[0].get('href')
         return first_link
 
+
+class WorkersHcmBodySerializer(serializers.Serializer):
+    person_number = serializers.CharField(max_length=20, read_only=True)
+    display_name = serializers.CharField(max_length=50)
+    department_name = serializers.CharField(max_length=50)
+
+class WorkersHcmSerializer(serializers.Serializer):
+    items = WorkersHcmBodySerializer(many=True)
+    next_offset = serializers.IntegerField()
+    count = serializers.IntegerField()
+    has_more = serializers.BooleanField()
 
 # PeopleSoft
 

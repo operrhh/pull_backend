@@ -9,10 +9,11 @@ from rest_framework.permissions import IsAuthenticated
 from ..pagination import CustomPaginationPeopleSoft, CustomPaginationHcm
 
 #Serializers
-from .serializers import WorkerHcmSerializer, WorkerPeopleSoftSerializer
+from .serializers import WorkerHcmSerializer, WorkersHcmSerializer, WorkerPeopleSoftSerializer
 
 # Service
 from ..services.workerServiceHcm import WorkerServiceHcm
+from ..services.workerServiceHcm2 import WorkerServiceHcm2
 from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 
 # region HCM
@@ -20,20 +21,33 @@ from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def workers_hcm_api_view(request):
-    worker_service = WorkerServiceHcm()
+    worker_service = WorkerServiceHcm2()
     if request.method == 'GET':
-        try:
-            workers = worker_service.get_workers_hcm(request)
-            if workers:
-                pagination = CustomPaginationHcm()
-                pagination.queryset = workers
-                result_page = pagination.paginate_queryset(workers, request)
-                if result_page is not None:
-                    workers_serializer = WorkerHcmSerializer(result_page, many=True)
-                    response = pagination.get_paginated_response(workers_serializer.data)
-                    return Response(response.data, status = status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'message': str(e)})
+        workers = worker_service.get_workers_hcm(request)
+        if workers:
+            workers_serializer = WorkersHcmSerializer(workers)
+            return Response(workers_serializer.data, status = status.HTTP_200_OK)
+
+
+
+    # if request.method == 'GET':
+    #     try:
+    #         workers = worker_service.get_workers_hcm(request)
+    #         if workers:
+    #             # pagination = CustomPaginationHcm()
+    #             # #pagination.queryset = workers
+    #             # result_page = pagination.paginate_queryset(workers, request)
+    #             # if result_page is not None:
+    #             #     workers_serializer = WorkerHcmSerializer(result_page, many=True)
+    #             #     response = pagination.get_paginated_response(workers_serializer.data)
+    #             #     return Response(response.data, status = status.HTTP_200_OK)
+
+    #             workers_serializer = WorkerHcmSerializer(workers, many=True)
+    #             return Response(workers_serializer.data, status = status.HTTP_200_OK)
+
+    #     except Exception as e:
+    #         return Response({'message': str(e)})
+        
     if request.method == 'PUT':
         try:
             workers = worker_service.get_workers_hcm(request)

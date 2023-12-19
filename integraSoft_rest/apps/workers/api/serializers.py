@@ -156,7 +156,8 @@ class WorkerHcmWorkRelationshipsSerializer(serializers.Serializer):
     last_updated_by = serializers.CharField(source='LastUpdatedBy',max_length=20)
     last_update_date = serializers.CharField(source='LastUpdateDate',max_length=20)
     projected_termination_date = serializers.CharField(source='ProjectedTerminationDate',max_length=20)
-    assignments = WorkerHcmWorkRelationshipsAssignmentsSerializer(many=True)    
+    # assignments = WorkerHcmWorkRelationshipsAssignmentsSerializer(many=True)
+    assignment = WorkerHcmWorkRelationshipsAssignmentsSerializer()
     link = serializers.SerializerMethodField()
 
     def get_link(self, obj):
@@ -181,6 +182,7 @@ class WorkerHcmSerializer(serializers.Serializer):
     phones = WorkerHcmPhonesSerializer(many=True)
     addresses = WorkerHcmAddressesSerializer(many=True)
     work_relationships = WorkerHcmWorkRelationshipsSerializer(many=True)
+    #work_relationships = WorkerHcmWorkRelationshipsSerializer()
     
     def get_link(self, obj):
         first_link = obj.get('links')[0].get('href')

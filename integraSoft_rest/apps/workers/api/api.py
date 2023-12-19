@@ -12,7 +12,7 @@ from ..pagination import CustomPaginationPeopleSoft, CustomPaginationHcm
 from .serializers import WorkerHcmSerializer, WorkersHcmSerializer, WorkerPeopleSoftSerializer
 
 # Service
-from ..services.workerServiceHcm import WorkerServiceHcm
+# from ..services.workerServiceHcm import WorkerServiceHcm
 from ..services.workerServiceHcm2 import WorkerServiceHcm2
 from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 
@@ -21,51 +21,48 @@ from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def workers_hcm_api_view(request):
-    worker_service = WorkerServiceHcm2()
-    if request.method == 'GET':
-        workers = worker_service.get_workers_hcm(request)
-        if workers:
-            workers_serializer = WorkersHcmSerializer(workers)
-            return Response(workers_serializer.data, status = status.HTTP_200_OK)
+    try:
+        worker_service = WorkerServiceHcm2()
 
-
-
-    # if request.method == 'GET':
-    #     try:
-    #         workers = worker_service.get_workers_hcm(request)
-    #         if workers:
-    #             # pagination = CustomPaginationHcm()
-    #             # #pagination.queryset = workers
-    #             # result_page = pagination.paginate_queryset(workers, request)
-    #             # if result_page is not None:
-    #             #     workers_serializer = WorkerHcmSerializer(result_page, many=True)
-    #             #     response = pagination.get_paginated_response(workers_serializer.data)
-    #             #     return Response(response.data, status = status.HTTP_200_OK)
-
-    #             workers_serializer = WorkerHcmSerializer(workers, many=True)
-    #             return Response(workers_serializer.data, status = status.HTTP_200_OK)
-
-    #     except Exception as e:
-    #         return Response({'message': str(e)})
-        
-    if request.method == 'PUT':
-        try:
-            workers = worker_service.get_workers_hcm(request)
-            if workers and len(workers) == 1:
-                worker = workers[0]
-                worker_serializer = WorkerHcmSerializer(worker)
-                res = worker_service.update_worker_hcm(request.body, worker_serializer.data)
-                return Response(res, status = status.HTTP_200_OK)
+        if request.method == 'GET':
+            many_workers = request.query_params.get('manyWorkers', 'True')
+            if many_workers.lower() == 'false':
+                many_workers = False
             else:
-                return Response({'message': 'La busqueda de Workers arrojo mas de un resultado'}, status = status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'message': str(e)})
-    if request.method == 'POST':
-        try:
-            res = worker_service.create_worker_hcm(request.body)
-            return Response(res, status = status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'message': str(e)})
+                many_workers = True
+
+            if many_workers:
+                workers = worker_service.get_workers_hcm(request)
+                if workers:
+                    workers_serializer = WorkersHcmSerializer(workers)
+                    return Response(workers_serializer.data, status = status.HTTP_200_OK)
+            else:
+                worker = worker_service.get_worker_hcm(request)
+                if worker:
+                        worker_serializer = WorkerHcmSerializer(worker)
+                        return Response(worker_serializer.data, status = status.HTTP_200_OK)
+        if request.method == 'PUT':
+            try:
+                workers = worker_service.get_workers_hcm(request)
+                if workers and len(workers) == 1:
+                    worker = workers[0]
+                    worker_serializer = WorkerHcmSerializer(worker)
+                    res = worker_service.update_worker_hcm(request.body, worker_serializer.data)
+                    return Response(res, status = status.HTTP_200_OK)
+                else:
+                    return Response({'message': 'La busqueda de Workers arrojo mas de un resultado'}, status = status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({'message': str(e)})
+        if request.method == 'POST':
+            try:
+                res = worker_service.create_worker_hcm(request.body)
+                return Response(res, status = status.HTTP_200_OK)
+            except Exception as e:
+                return Response({'message': str(e)})            
+    except Exception as e:
+        return Response({'message': str(e)})
+
+
 # endregion
 
 # region PeopleSoft

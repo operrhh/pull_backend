@@ -259,6 +259,10 @@ class WorkerServiceHcm:
         assignments = work_relationships.get('assignments', {}).get('items', [])
         assignments_department_id = assignments[0]['DepartmentId']
 
+
+
+
+
         # Si se esta filtrando por departamento
         if self.department_id != 0:
             # Si el departamento del worker es igual al departamento filtrado

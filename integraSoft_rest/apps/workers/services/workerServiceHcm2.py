@@ -41,26 +41,13 @@ class WorkerServiceHcm2:
                 if response.get('count') != 0:
                     items = response.get('items')
                     self.has_more = response.get('hasMore')
-                    workers = self.convert_data(items)
+                    workers = self.convert_data_many(items)
                     print("Tamaño de la lista: ", len(self.list_convert))
                     if self.list_convert_full == False and self.has_more == True:
                         self.offset_more_integrasoft = True
                         self.get_workers_hcm(request)
 
-                    if self.has_more:
-                        res = {
-                            'items': workers,
-                            'next_offset': self.contador_registros,
-                            'count': len(workers),
-                            'has_more': self.has_more
-                        }
-                    else:
-                        res = {
-                            'items': workers,
-                            'next_offset': 1,
-                            'count': len(workers),
-                            'has_more': self.has_more
-                        }                        
+                    res = self.create_data_worker_return(workers)
 
                     return res
                 else:
@@ -69,15 +56,15 @@ class WorkerServiceHcm2:
                 raise ExceptionWorkerHcm('Error al consultar workers')
         except Exception as e:
             raise Exception(e) from e
-        
+
     def get_worker_hcm(self, request):
         params = self.params_definition(request)
         try:
             response = self.global_service.generate_request(self.dic_url.get('worker'), params)
             if response:
                 if response.get('count') != 0:
-                    items = response.get('items')
-                    worker = self.convert_data(items)
+                    item = response.get('items')
+                    worker = self.convert_data(item[0])
                     return worker
                 else:
                     raise ExceptionWorkerHcm('No se han encontrado worker')
@@ -116,32 +103,95 @@ class WorkerServiceHcm2:
         return centro_costo
 
     def create_worker_data_details(self, result):
-        return result
-    
+        worker_data: dict = {
+                'person_id': result.get('PersonId'),
+                'person_number': result.get('PersonNumber'),
+                'date_of_birth': result.get('DateOfBirth'),
+                'date_of_death': result.get('DateOfDeath'),
+                'country_of_birth': result.get('CountryOfBirth'),
+                'region_of_birth': result.get('RegionOfBirth'),
+                'town_of_birth': result.get('TownOfBirth'),
+                'created_by': result.get('CreatedBy'),
+                'creation_date': result.get('CreationDate'),
+                'last_updated_by': result.get('LastUpdatedBy'),
+                'last_update_date': result.get('LastUpdateDate'),
+                'names': result.get('names').get('items', []),
+                'emails': result.get('emails').get('items', []),
+                'addresses': result.get('addresses').get('items', []),
+                'phones': result.get('phones').get('items', []),
+                'work_relationships': [], # Realizamos un trabajo adicional para obtener los assignments
+                'links': result.get('links', [])
+            }
+        
+        work_relationships = result.get('workRelationships', {}).get('items', [])
+
+        # Se obtiene el ultimo work_relationship
+        last_work_relationship = self.get_last_work_relationship(work_relationships)
+
+        last_assignment = last_work_relationship.get('assignments').get('items', [])[0]
+
+        # last_assignment = last_work_relationship.get('assignments', {}).get('items', [])
+
+        assignments_department_id = last_assignment['DepartmentId']
+
+        centro_costo = self.dic_centro_costo.get(assignments_department_id)
+        if not centro_costo:
+            centro_costo = self.get_centro_costo_hcm(assignments_department_id)
+        last_assignment['CcuCodigoCentroCosto'] = centro_costo
+
+        salary = self.get_salary_hcm(last_assignment['AssignmentId'])
+        last_assignment['SalaryAmount'] = salary
+
+        last_work_relationship['assignment'] = last_assignment
+
+        worker_data['work_relationships'].append(last_work_relationship)
+        
+        return worker_data
+
+    def get_salary_hcm(self,assignmentd_id):
+        params = {}
+        params['q'] = f"AssignmentId={assignmentd_id}"
+        params['orderBy'] = 'DateTo:desc'
+        try:
+            response = self.global_service.generate_request(self.dic_url.get('salary'),params=params)
+            if response:
+                if response.get('count') != 0:
+                    salary = response.get('items')[0]
+                    return salary.get('SalaryAmount')
+                else:
+                    return 0
+        except Exception as e:
+            raise Exception(e) from e
+
+
+
+    def get_last_work_relationship(self, work_relationships):
+        # Se ordenan los work_relationships por fecha de inicio
+        work_relationships_ordenados = sorted(work_relationships, key=lambda k: k['StartDate'], reverse=True)
+        # Se toma el primer work_relationship que es el mas reciente
+        return work_relationships_ordenados[0]
+
     def create_worker_data_many(self, result):
         work_relationships = result.get('workRelationships', {}).get('items', [])
 
-        # Se ordenan los work_relationships por fecha de inicio
-        work_relationships_ordenados = sorted(work_relationships, key=lambda k: k['StartDate'], reverse=True)
+        # Se obtiene el ultimo work_relationship
+        last_work_relationship = self.get_last_work_relationship(work_relationships)
 
-        # Se toma el primer work_relationship que es el mas reciente
-        work_relationships = work_relationships_ordenados[0]
-
-        assignments = work_relationships.get('assignments', {}).get('items', [])
+        assignments = last_work_relationship.get('assignments', {}).get('items', [])
 
         work_names = result.get('names', {}).get('items', [])
+
+        # Si hay department id, se filtra por el
+        if self.department_id_param_integrasoft != 0:
+            if assignments[0]['DepartmentId'] != self.department_id_param_integrasoft:
+                print("No | ", self.contador_registros , " | ", result.get('PersonNumber'), " | ", work_names[0]['DisplayName'], " | ", assignments[0]['DepartmentName'])
+                return None
 
         # Datos de la persona
         worker_data: dict = {}
         worker_data['person_number'] = result.get('PersonNumber')
         worker_data['display_name'] = work_names[0]['DisplayName']
         worker_data['department_name'] = assignments[0]['DepartmentName']
-
-        # Si hay department id, se filtra por el
-        if self.department_id_param_integrasoft != 0:
-            if assignments[0]['DepartmentId'] != self.department_id_param_integrasoft:
-                print("No | ", self.contador_registros , " | ", worker_data['person_number'], " | ", worker_data['display_name'], " | ", worker_data['department_name'])
-                return None
 
         print("Si | ", self.contador_registros , " | ", worker_data['person_number'], " | ", worker_data['display_name'], " | ", worker_data['department_name'])
 
@@ -153,7 +203,13 @@ class WorkerServiceHcm2:
         else:
             return self.create_worker_data_details(result)
 
-    def convert_data(self, items):
+    def convert_data(self, item):
+        worker_data = self.create_worker_data(item)
+        if worker_data:
+            self.list_convert.append(worker_data)
+        return worker_data
+
+    def convert_data_many(self, items):
         for result in items:
             self.contador_registros += 1
             worker_data = self.create_worker_data(result)
@@ -163,6 +219,23 @@ class WorkerServiceHcm2:
                     self.list_convert_full = True
                     break
         return self.list_convert
+
+    def create_data_worker_return(self, worker_data):
+        if self.has_more:
+            res = {
+                'items': worker_data,
+                'next_offset': self.contador_registros,
+                'count': len(worker_data),
+                'has_more': self.has_more
+            }
+        else:
+            res = {
+                'items': worker_data,
+                'next_offset': 1,
+                'count': len(worker_data),
+                'has_more': self.has_more
+            }
+        return res
 
     def params_definition(self, request):
         """
@@ -174,12 +247,32 @@ class WorkerServiceHcm2:
         Returns:
             A dictionary containing the constructed query parameters.
         """
+
+        many = request.query_params.get('manyWorkers', 'True')
+        if many.lower() == 'false':
+            self.many_workers = False
+        else:
+            self.many_workers = True
+
+
+        # if self.many_workers:
+        #     person_number = request.query_params.get('personNumber', None)
+        #     first_name = request.query_params.get('firstName', None)
+        #     last_name = request.query_params.get('lastName', None)
+        #     legislation_code = request.query_params.get('legislationCode', 'CL')
+        #     self.department_id_param_integrasoft = int(request.query_params.get('department', 0))
+        #     self.offset_param_integrasoft = int(request.query_params.get('offset', 1))
+        # else:
+        #     person_number = request.query_params.get('personNumber', None)
+        #     legislation_code = request.query_params.get('legislationCode', 'CL')
+        #     self.offset_param_integrasoft = int(request.query_params.get('offset', 1))
+            
+
         person_number = request.query_params.get('personNumber', None)
         first_name = request.query_params.get('firstName', None)
         last_name = request.query_params.get('lastName', None)
         legislation_code = request.query_params.get('legislationCode', 'CL')
         self.department_id_param_integrasoft = int(request.query_params.get('department', 0))
-        self.many_workers = bool(request.query_params.get('manyWorkers', True))
         self.offset_param_integrasoft = int(request.query_params.get('offset', 1))
 
         query_params = ''
@@ -220,19 +313,23 @@ class WorkerServiceHcm2:
 
         params['limit'] = self.limit_hcm
 
-        if self.offset_more_integrasoft:
-            params['offset'] = self.contador_registros + 1
-        else:
-            if self.offset_param_integrasoft == 1:
-                params['offset'] = 0
-                self.contador_registros = -1
-            else:
-                params['offset'] = self.offset_param_integrasoft + 1
-                self.contador_registros = self.offset_param_integrasoft
-            
-            print("Contador de registros: ", self.contador_registros)
 
-        params['orderBy'] = 'PersonId:desc'
+        if self.many_workers:
+            if self.offset_more_integrasoft:
+                params['offset'] = self.contador_registros + 1
+            else:
+                if self.offset_param_integrasoft == 1:
+                    params['offset'] = 0
+                    self.contador_registros = -1
+                else:
+                    params['offset'] = self.offset_param_integrasoft + 1
+                    self.contador_registros = self.offset_param_integrasoft
+                
+                print("Contador de registros: ", self.contador_registros)
+
+            params['orderBy'] = 'PersonId:desc'
+        else:
+            params['offset'] = 0
 
         print("Parametros de la consulta: ", params)
         return params

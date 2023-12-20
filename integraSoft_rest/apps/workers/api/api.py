@@ -13,7 +13,7 @@ from .serializers import WorkerHcmSerializer, WorkersHcmSerializer, WorkerPeople
 
 # Service
 # from ..services.workerServiceHcm import WorkerServiceHcm
-from ..services.workerServiceHcm2 import WorkerServiceHcm2
+from ..services.workerServiceHcm import WorkerServiceHcm
 from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 
 # region HCM
@@ -22,7 +22,7 @@ from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 @permission_classes([IsAuthenticated])
 def workers_hcm_api_view(request):
     try:
-        worker_service = WorkerServiceHcm2()
+        worker_service = WorkerServiceHcm()
 
         if request.method == 'GET':
             many_workers = request.query_params.get('manyWorkers', 'True')

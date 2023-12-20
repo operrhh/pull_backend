@@ -106,8 +106,8 @@ class WorkerHcmWorkRelationshipsAssignmentsSerializer(serializers.Serializer):
     job_code = serializers.CharField(source='JobCode',max_length=20)
     department_id = serializers.CharField(source='DepartmentId',max_length=20)
     department_name = serializers.CharField(source='DepartmentName',max_length=100)
-    # location_id = serializers.CharField(source='LocationId',max_length=20)
-    # location_code = serializers.CharField(source='LocationCode',max_length=20)
+    location_id = serializers.CharField(source='LocationId',max_length=20)
+    location_code = serializers.CharField(source='LocationCode',max_length=20)
     # work_at_home_flag = serializers.CharField(source='WorkAtHomeFlag',max_length=20)
     # assignment_category = serializers.CharField(source='AssignmentCategory',max_length=20)
     # worker_category = serializers.CharField(source='WorkerCategory',max_length=20)
@@ -130,6 +130,7 @@ class WorkerHcmWorkRelationshipsAssignmentsSerializer(serializers.Serializer):
     last_update_date = serializers.CharField(source='LastUpdateDate',max_length=20)
     ccu_codigo_centro_costo = serializers.CharField(source='CcuCodigoCentroCosto',max_length=20)
     salary_amount = serializers.CharField(source='SalaryAmount',max_length=20)
+    manager = serializers.CharField(source='Manager',max_length=20)
     link = serializers.SerializerMethodField()
 
     def get_link(self, obj):

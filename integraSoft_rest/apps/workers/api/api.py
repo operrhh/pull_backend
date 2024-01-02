@@ -6,7 +6,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 #Paginations
-from ..pagination import CustomPaginationPeopleSoft, CustomPaginationHcm
+from ..pagination import CustomPaginationPeopleSoft
 
 #Serializers
 from .serializers import WorkerHcmSerializer, WorkersHcmSerializer, WorkerPeopleSoftSerializer

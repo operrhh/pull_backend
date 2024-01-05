@@ -33,8 +33,9 @@ class DepartmentServiceHcm():
                     self.total_results = response.get('totalResults')
                     self.convert_departments(items)
                 else:
-                    raise Exception('No se encontraron Departments')
-            
+                    raise Exception('No se encontraron departments')
+            else:
+                raise Exception('Error al consultar departments')            
             res = {
                 'items': self.departments,
                 'next': self.contador_registros if self.has_more else 0,
@@ -48,13 +49,14 @@ class DepartmentServiceHcm():
 
             return res
         except Exception as e:
-            raise Exception(e)
+            raise Exception(e) from e
 
     def get_link_request(self,request):
         return request.build_absolute_uri()
 
     def params_definition(self, request):
-        self.offset = int(request.query_params.get('offset')) if request.query_params.get('offset') else self.offset
+        # self.offset = int(request.query_params.get('offset')) if request.query_params.get('offset') else self.offset
+        self.offset = int(request.query_params.get('offset', self.offset))
         self.offset = self.offset - 1
 
         self.last_offset = self.offset

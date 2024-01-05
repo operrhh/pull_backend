@@ -1,4 +1,49 @@
 from rest_framework import serializers
+from rest_framework.utils.urls import replace_query_param, remove_query_param
+
+class WorkersHcmBodySerializer(serializers.Serializer):
+    person_number = serializers.CharField(max_length=20, read_only=True)
+    display_name = serializers.CharField(max_length=50)
+    department_name = serializers.CharField(max_length=50)
+
+class WorkersHcmSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
+    totalResults = serializers.IntegerField(source='total_results')
+    hasMore = serializers.BooleanField(source='has_more')
+    next = serializers.SerializerMethodField()
+    previous = serializers.SerializerMethodField()
+    items = WorkersHcmBodySerializer(many=True)
+    limit = serializers.IntegerField()
+    url = serializers.CharField(max_length=100)
+    # items = WorkersHcmBodySerializer(many=True)
+    # next_offset = serializers.IntegerField()
+    # count = serializers.IntegerField()
+    # has_more = serializers.BooleanField()
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data.pop('url', None)
+        data.pop('limit', None)
+        return data
+
+    def get_next(self, obj):
+        _next = obj.get('next') + 1 # Agregamos 1 para que el offset sea legible para el usuario
+
+        if obj.get('has_more') == True:
+            return replace_query_param(obj.get('url'), 'offset', _next)
+        return None
+
+    def get_previous(self, obj):
+        _previous = obj.get('previous') + 1 # Agregamos 1 para que el offset sea legible para el usuario
+
+        if _previous == 0:
+            return None
+        elif (_previous - obj.get('count')) <= 0:
+            return remove_query_param(obj.get('url'), 'offset')
+        elif (obj.get('has_more') == False):
+            return replace_query_param(obj.get('url'), 'offset', (_previous - obj.get('limit')))
+        else:
+            return replace_query_param(obj.get('url'), 'offset', (_previous - obj.get('count')))
 
 class WorkerHcmNamesSerializer(serializers.Serializer):
     legislation_code = serializers.CharField(source='LegislationCode',max_length=10)
@@ -189,17 +234,6 @@ class WorkerHcmSerializer(serializers.Serializer):
         first_link = obj.get('links')[0].get('href')
         return first_link
 
-
-class WorkersHcmBodySerializer(serializers.Serializer):
-    person_number = serializers.CharField(max_length=20, read_only=True)
-    display_name = serializers.CharField(max_length=50)
-    department_name = serializers.CharField(max_length=50)
-
-class WorkersHcmSerializer(serializers.Serializer):
-    items = WorkersHcmBodySerializer(many=True)
-    next_offset = serializers.IntegerField()
-    count = serializers.IntegerField()
-    has_more = serializers.BooleanField()
 
 # PeopleSoft
 

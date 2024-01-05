@@ -19,7 +19,7 @@ class Parameter(models.Model):
         db_table = 'Parameter'
 
 class ParameterType(models.Model):
-    Description = models.TextField(blank=False, null=False)
+    Description = models.CharField(blank=False, null=False, max_length=100)
 
     class Meta:
         db_table = 'ParameterType'

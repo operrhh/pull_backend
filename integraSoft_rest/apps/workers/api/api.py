@@ -24,13 +24,8 @@ def workers_hcm_api_view(request):
     try:
         worker_service = WorkerServiceHcm()
 
-        if request.method == 'GET':
-            many_workers = request.query_params.get('manyWorkers', 'True')
-            if many_workers.lower() == 'false':
-                many_workers = False
-            else:
-                many_workers = True
-
+        if request.method == 'GET':            
+            many_workers = request.query_params.get('manyWorkers', 'True').lower() == 'true'
             if many_workers:
                 workers = worker_service.get_workers_hcm(request)
                 if workers:
@@ -40,7 +35,7 @@ def workers_hcm_api_view(request):
                 worker = worker_service.get_worker_hcm(request)
                 if worker:
                         worker_serializer = WorkerHcmSerializer(worker)
-                        return Response(worker_serializer.data, status = status.HTTP_200_OK)
+                        return Response(worker_serializer.data, status = status.HTTP_200_OK)                
         if request.method == 'PUT':
             try:
                 workers = worker_service.get_workers_hcm(request)

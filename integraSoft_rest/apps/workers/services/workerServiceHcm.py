@@ -279,12 +279,7 @@ class WorkerServiceHcm:
         Returns:
             A dictionary containing the constructed query parameters.
         """
-
-        many = request.query_params.get('manyWorkers', 'True')
-        if many.lower() == 'false':
-            self.many_workers = False
-        else:
-            self.many_workers = True
+        self.many_workers = request.query_params.get('manyWorkers', 'True').lower() == 'true'
 
         person_number = request.query_params.get('personNumber', None)
         first_name = request.query_params.get('firstName', None)
@@ -330,7 +325,6 @@ class WorkerServiceHcm:
             params['expand'] = 'names,emails,addresses,phones,workRelationships.assignments,workRelationships.assignments.managers'
 
         params['limit'] = self.limit_hcm
-
 
         if self.many_workers:
             if self.offset_more_integrasoft:

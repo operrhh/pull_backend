@@ -16,8 +16,8 @@ from apps.users.api.serializers import UserSerializer, UserListSerializer, UserL
 
 
 @api_view(['GET','POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAdminUser])
+# @authentication_classes([TokenAuthentication])
+@permission_classes([AllowAny])
 def user_api_view(request):
     if request.method == 'GET':
         users = User.objects.values('id','username','email','password')

@@ -13,6 +13,7 @@ class WorkersHcmSerializer(serializers.Serializer):
     next = serializers.SerializerMethodField()
     previous = serializers.SerializerMethodField()
     items = WorkersHcmBodySerializer(many=True)
+    excludedItems = serializers.IntegerField(source='excluded_items')
     limit = serializers.IntegerField()
     url = serializers.CharField(max_length=100)
     # items = WorkersHcmBodySerializer(many=True)
@@ -43,6 +44,10 @@ class WorkersHcmSerializer(serializers.Serializer):
         elif (obj.get('has_more') == False):
             return replace_query_param(obj.get('url'), 'offset', (_previous - obj.get('limit')))
         else:
+            # return replace_query_param(obj.get('url'), 'offset', (_previous - obj.get('count')))
+            print('previous: ', _previous)
+            print('count: ', obj.get('count'))
+            print('excluded_items: ', obj.get('excluded_items'))
             return replace_query_param(obj.get('url'), 'offset', (_previous - obj.get('count')))
 
 class WorkerHcmNamesSerializer(serializers.Serializer):

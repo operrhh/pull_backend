@@ -25,7 +25,7 @@ class DepartmentServiceHcm():
     def get_departments(self,request):
         params = self.params_definition(request)
         try:
-            response = self.global_service.generate_request(self.dic_url.get('department'), params)
+            response = self.global_service.generate_request(request=request, url=self.dic_url.get('department'), params=params)
             if response:
                 if response.get('count') != 0:
                     items = response.get('items')

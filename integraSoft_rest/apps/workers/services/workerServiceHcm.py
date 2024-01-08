@@ -22,6 +22,7 @@ class WorkerServiceHcm:
         self.dic_centro_costo = {}
         self.list_convert_full: bool = False
         self.many_workers: bool = True
+        self.excluded_items: int = 0
 
         # Parametros para la paginacion de hcm
         self.limit_hcm = 20
@@ -35,7 +36,7 @@ class WorkerServiceHcm:
     def get_workers_hcm(self, request):
         params = self.params_definition(request)
         try:
-            response = self.global_service.generate_request(self.dic_url.get('worker'), params)
+            response = self.global_service.generate_request(request=request,url=self.dic_url.get('worker'), params=params)
             if response:
                 if response.get('count') != 0:
                     items = response.get('items')
@@ -52,8 +53,6 @@ class WorkerServiceHcm:
                     raise ExceptionWorkerHcm('No se han encontrado worker')
             else:
                 raise ExceptionWorkerHcm('Error al consultar workers')
-            
-            # res = self.create_data_worker_return(workers)
 
             res = {
                 'items': workers,
@@ -62,6 +61,7 @@ class WorkerServiceHcm:
                 'count': len(workers),
                 'has_more': self.has_more,
                 'total_results': self.total_results,
+                'excluded_items': self.excluded_items,
                 'limit': self.limit_hcm,
                 'url': self.get_link_request(request)
             }
@@ -127,8 +127,6 @@ class WorkerServiceHcm:
 
         department_dff = department.get('departmentsDFF').get('items')[0]
         centro_costo = department_dff.get('ccuCodigoCentroCosto')
-        # if centro_costo == None:
-        #     centro_costo = 'No asignado'
         self.insert_centro_costo_dic(department_id,centro_costo)
         return centro_costo
 
@@ -286,6 +284,8 @@ class WorkerServiceHcm:
                 if len(self.list_convert) == self.limit_integrasoft:
                     self.list_convert_full = True
                     break
+            else:
+                self.excluded_items += 1
         return self.list_convert
 
     def params_definition(self, request):

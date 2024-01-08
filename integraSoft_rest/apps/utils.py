@@ -1,8 +1,7 @@
 from apps.logs.models import LogEntry
 
-def log_entry(user, level, message):
+def log_entry(user, level: str, message: str):
     try:
-        print("User: " + user.username + " - Level: " + level + " - Message: " + message)
         LogEntry.objects.create(
             user=user,
             level=level,

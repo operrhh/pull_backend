@@ -1,10 +1,11 @@
 from apps.logs.models import LogEntry
 
-def log_entry(user, level: str, message: str):
+def log_entry(user, level: str, module: str,message: str):
     try:
         LogEntry.objects.create(
             user=user,
             level=level,
+            module=module,
             message=message
         )
     except Exception as e:

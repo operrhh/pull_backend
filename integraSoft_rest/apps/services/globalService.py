@@ -41,7 +41,7 @@ class GlobalService:
         else:
             try:
                 response = requests.get(url, headers=headers, params=params)
-                log_entry(request.user, 'INFO', 'URL: ' + response.url)
+                log_entry(request.user, 'INFO', 'globalService', 'URL: ' + response.url)
                 if response.status_code == 200:
                     return response.json()
                 else:

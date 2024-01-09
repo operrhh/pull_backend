@@ -15,8 +15,8 @@ from apps.users.models import User
 from apps.users.api.serializers import UserSerializer, UserListSerializer, UserLoginSerializer
 
 
-@api_view(['GET','POST'])
-# @authentication_classes([TokenAuthentication])
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
 @permission_classes([AllowAny])
 def user_api_view(request):
     if request.method == 'GET':
@@ -24,13 +24,16 @@ def user_api_view(request):
         users_serializer = UserListSerializer(users, many=True)
         return Response(users_serializer.data, status=status.HTTP_200_OK)
 
-    elif request.method == 'POST':
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def user_create_api_view(request):
+    if request.method == 'POST':
         user_serializer = UserSerializer(data=request.data)
-
         if user_serializer.is_valid():
             user_serializer.save()
             return Response({'message':'Usuario creado correctamente'}, status=status.HTTP_201_CREATED)
         return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET','PUT','DELETE'])
 @authentication_classes([TokenAuthentication])

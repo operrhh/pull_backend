@@ -25,6 +25,7 @@ class WorkersHcmSerializer(serializers.Serializer):
         data = super().to_representation(instance)
         data.pop('url', None)
         data.pop('limit', None)
+        data.pop('excludedItems', None)
         return data
 
     def get_next(self, obj):
@@ -261,6 +262,7 @@ class WorkerPeopleSoftSerializer(serializers.Serializer):
     city = serializers.CharField(max_length=20)
     county = serializers.CharField(max_length=20)
     state = serializers.CharField(max_length=20)
+    email_worker = serializers.CharField(max_length=20)
     home_phone = serializers.CharField(max_length=20)
     national_id_type = serializers.CharField(max_length=20)
     national_id = serializers.CharField(max_length=20)

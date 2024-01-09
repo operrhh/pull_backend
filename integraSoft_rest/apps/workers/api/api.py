@@ -11,8 +11,7 @@ from ..pagination import CustomPaginationPeopleSoft
 #Serializers
 from .serializers import WorkerHcmSerializer, WorkersHcmSerializer, WorkerPeopleSoftSerializer
 
-# Service
-# from ..services.workerServiceHcm import WorkerServiceHcm
+# Services
 from ..services.workerServiceHcm import WorkerServiceHcm
 from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 
@@ -23,10 +22,7 @@ from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 def workers_hcm_api_view(request):
     try:
         worker_service = WorkerServiceHcm()
-        user = request.user
-        print(user.username)
-        print(user.id)
-        
+
         if request.method == 'GET':
             many_workers = request.query_params.get('manyWorkers', 'True').lower() == 'true'
             if many_workers:

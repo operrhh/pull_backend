@@ -23,6 +23,7 @@ class WorkerServiceHcm:
         self.list_convert_full: bool = False
         self.many_workers: bool = True
         self.excluded_items: int = 0
+        self.res = {}
 
         # Parametros para la paginacion de hcm
         self.limit_hcm = 20
@@ -34,8 +35,8 @@ class WorkerServiceHcm:
         self.limit_integrasoft = 20
 
     def get_workers_hcm(self, request):
-        params = self.params_definition(request)
         try:
+            params = self.params_definition(request)
             response = self.global_service.generate_request(request=request,url=self.dic_url.get('worker'), params=params)
             if response:
                 if response.get('count') != 0:
@@ -48,13 +49,13 @@ class WorkerServiceHcm:
 
                     if self.list_convert_full == False and self.has_more == True:
                         self.offset_more_integrasoft = True
-                        self.get_workers_hcm(request)
+                        return self.get_workers_hcm(request)
                 else:
                     raise ExceptionWorkerHcm('No se han encontrado worker')
             else:
                 raise ExceptionWorkerHcm('Error al consultar workers')
 
-            res = {
+            self.res = {
                 'items': workers,
                 'next': self.contador_registros if self.has_more else 0,
                 'previous': self.last_offset_param_integrasoft,
@@ -66,26 +67,20 @@ class WorkerServiceHcm:
                 'url': self.get_link_request(request)
             }
 
-            return res
+            print("----------Res----------- ")
+            print('next: ' + str(self.res['next']))
+            print('previous: ' + str(self.res['previous']))
+            print('count: ' + str(self.res['count']))
+            print('has_more: ' + str(self.res['has_more']))
+            print('total_results: ' + str(self.res['total_results']))
+            print('excluded_items: ' + str(self.res['excluded_items']))
+            print('limit: ' + str(self.res['limit']))
+            print("----------End_Res----------- ")
+            
+
+            return self.res
         except Exception as e:
             raise Exception(e) from e
-
-    def create_data_worker_return(self, worker_data):
-        if self.has_more:
-            res = {
-                'items': worker_data,
-                'next_offset': self.contador_registros,
-                'count': len(worker_data),
-                'has_more': self.has_more
-            }
-        else:
-            res = {
-                'items': worker_data,
-                'next_offset': 1,
-                'count': len(worker_data),
-                'has_more': self.has_more
-            }
-        return res
 
     def get_worker_hcm(self, request):
         params = self.params_definition(request)

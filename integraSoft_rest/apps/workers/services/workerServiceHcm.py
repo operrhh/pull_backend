@@ -1,6 +1,7 @@
 from ...services.globalService import GlobalService
 from ..custom_exceptions import ExceptionJson, ExceptionWorkerHcm
 from apps.parameters.models import Parameter, ParameterType
+from apps.logs.models import AuxiliarySessionUser
 
 class WorkerServiceHcm:
     def __init__(self):
@@ -26,13 +27,13 @@ class WorkerServiceHcm:
         self.res = {}
 
         # Parametros para la paginacion de hcm
-        self.limit_hcm = 20
+        self.limit_hcm = 30 # Este parametro es para la cantidad de registros que se retornan en hcm
         self.has_more = False
         self.total_results: int = 0
 
         # Parametros para la paginacion de integraSoft
+        self.limit_integrasoft = 20 # Este parametro es para la cantidad de registros que se retornan en integraSoft
         self.offset_more_integrasoft = False
-        self.limit_integrasoft = 20
 
     def get_workers_hcm(self, request):
         try:
@@ -42,7 +43,7 @@ class WorkerServiceHcm:
                 if response.get('count') != 0:
                     items = response.get('items')
                     self.has_more = response.get('hasMore')
-                    self.total_results = response.get('totalResults')
+                    # self.total_results = response.get('totalResults')
                     workers = self.convert_data_many(items)
 
                     print("Tamaño de la lista: ", len(self.list_convert))
@@ -61,8 +62,9 @@ class WorkerServiceHcm:
                 'previous': self.last_offset_param_integrasoft,
                 'count': len(workers),
                 'has_more': self.has_more,
-                'total_results': self.total_results,
+                # 'total_results': self.total_results,
                 'excluded_items': self.excluded_items,
+                'last_excluded_items': self.auxiliary_session_user(request),
                 'limit': self.limit_hcm,
                 'url': self.get_link_request(request)
             }
@@ -72,8 +74,9 @@ class WorkerServiceHcm:
             print('previous: ' + str(self.res['previous']))
             print('count: ' + str(self.res['count']))
             print('has_more: ' + str(self.res['has_more']))
-            print('total_results: ' + str(self.res['total_results']))
+            # print('total_results: ' + str(self.res['total_results']))
             print('excluded_items: ' + str(self.res['excluded_items']))
+            print('last_excluded_items: ' + str(self.res['last_excluded_items']))
             print('limit: ' + str(self.res['limit']))
             print("----------End_Res----------- ")
             
@@ -81,6 +84,19 @@ class WorkerServiceHcm:
             return self.res
         except Exception as e:
             raise Exception(e) from e
+
+    def auxiliary_session_user(self, request):
+        user = request.user
+        # self.excluded_items = self.excluded_items - 1
+        if AuxiliarySessionUser.objects.filter(user=user).exists():
+            aux_session_user = AuxiliarySessionUser.objects.get(user=user)
+            last_excluded_items = aux_session_user.last_excluded_items
+            aux_session_user.last_excluded_items = self.excluded_items
+            aux_session_user.save()
+            return last_excluded_items
+        else:
+            AuxiliarySessionUser.objects.create(user=user, last_excluded_items=self.excluded_items)
+            return 0
 
     def get_worker_hcm(self, request):
         params = self.params_definition(request)
@@ -359,7 +375,7 @@ class WorkerServiceHcm:
                 
                 print("Contador de registros: ", self.contador_registros)
 
-            params['orderBy'] = 'PersonId:desc'
+            params['orderBy'] = 'PersonNumber:desc'
         else:
             params['offset'] = 0
 

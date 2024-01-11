@@ -8,12 +8,13 @@ class WorkersHcmBodySerializer(serializers.Serializer):
 
 class WorkersHcmSerializer(serializers.Serializer):
     count = serializers.IntegerField()
-    totalResults = serializers.IntegerField(source='total_results')
+    # totalResults = serializers.IntegerField(source='total_results')
     hasMore = serializers.BooleanField(source='has_more')
     next = serializers.SerializerMethodField()
     previous = serializers.SerializerMethodField()
     items = WorkersHcmBodySerializer(many=True)
     excludedItems = serializers.IntegerField(source='excluded_items')
+    lastExcludedItems = serializers.IntegerField(source='last_excluded_items')
     limit = serializers.IntegerField()
     url = serializers.CharField(max_length=100)
     # items = WorkersHcmBodySerializer(many=True)
@@ -26,6 +27,7 @@ class WorkersHcmSerializer(serializers.Serializer):
         data.pop('url', None)
         data.pop('limit', None)
         data.pop('excludedItems', None)
+        data.pop('lastExcludedItems', None)
         return data
 
     def get_next(self, obj):
@@ -43,13 +45,20 @@ class WorkersHcmSerializer(serializers.Serializer):
         elif (_previous - obj.get('count')) <= 0:
             return remove_query_param(obj.get('url'), 'offset')
         elif (obj.get('has_more') == False):
+            # if (_previous - obj.get('limit')) <= 0:    
+            # else:
             return replace_query_param(obj.get('url'), 'offset', (_previous - obj.get('limit')))
         else:
             # return replace_query_param(obj.get('url'), 'offset', (_previous - obj.get('count')))
             print('previous: ', _previous)
             print('count: ', obj.get('count'))
             print('excluded_items: ', obj.get('excluded_items'))
-            return replace_query_param(obj.get('url'), 'offset', (_previous - obj.get('count')))
+            print('last_excluded_items: ', obj.get('last_excluded_items'))
+
+            if (_previous - obj.get('count') - obj.get('last_excluded_items')) <= 0:
+                return remove_query_param(obj.get('url'), 'offset')
+
+            return replace_query_param(obj.get('url'), 'offset', (_previous - obj.get('count') - obj.get('last_excluded_items')))
 
 class WorkerHcmNamesSerializer(serializers.Serializer):
     legislation_code = serializers.CharField(source='LegislationCode',max_length=10)

@@ -43,7 +43,6 @@ class WorkerServiceHcm:
                 if response.get('count') != 0:
                     items = response.get('items')
                     self.has_more = response.get('hasMore')
-                    # self.total_results = response.get('totalResults')
                     workers = self.convert_data_many(items)
 
                     print("Tamaño de la lista: ", len(self.list_convert))
@@ -62,7 +61,6 @@ class WorkerServiceHcm:
                 'previous': self.last_offset_param_integrasoft,
                 'count': len(workers),
                 'has_more': self.has_more,
-                # 'total_results': self.total_results,
                 'excluded_items': self.excluded_items,
                 'last_excluded_items': self.auxiliary_session_user(request),
                 'limit': self.limit_hcm,

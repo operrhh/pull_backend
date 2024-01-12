@@ -2,7 +2,7 @@ import cx_Oracle
 
 def test_db_connection():
     # Configuración de la conexión basada en tu información
-    dsn_str = cx_Oracle.makedsn("localhost", 41521, service_name="PDBPRD.ccuhcmproddbsub.ccuhcmprodvcn.oraclevcn.com")
+    dsn_str = cx_Oracle.makedsn("localhost", 51521, service_name="dbnopod_pdb1.ccuhcmtestdbsub.ccuhcmvcn.oraclevcn.com")
     user = "dockerservice"
     password = "S3vic3Do_Ccu3#"
 

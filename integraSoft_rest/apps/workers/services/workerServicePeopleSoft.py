@@ -23,7 +23,7 @@ class WorkerServicePeopleSoft:
     def get_workers_peoplesoft(self, request):
 
         person_number = request.query_params.get('personNumber', None)
-        first_name = request.query_params.get('name', None)
+        first_name = request.query_params.get('firstName', None)
         last_name = request.query_params.get('lastName', None)
         department = request.query_params.get('department', None)
 

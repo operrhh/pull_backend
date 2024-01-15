@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""PRUEBA ENERO Django's command-line utility for administrative tasks."""
+"""PRUEBA ENERO 1 Django's command-line utility for administrative tasks."""
 import os
 import sys
 

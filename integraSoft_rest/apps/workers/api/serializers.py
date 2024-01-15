@@ -273,7 +273,7 @@ class WorkerPeopleSoftSerializer(serializers.Serializer):
     paygroup = serializers.CharField(max_length=20)
     empl_type = serializers.CharField(max_length=20)
     holiday_schedule = serializers.CharField(max_length=20)
-    std_hours = serializers.CharField(max_length=20)
+    std_hours = serializers.SerializerMethodField()
     reg_region = serializers.CharField(max_length=20)
     jobtitle = serializers.CharField(max_length=20)
     jobtitle_abbrv = serializers.CharField(max_length=20)
@@ -282,3 +282,11 @@ class WorkerPeopleSoftSerializer(serializers.Serializer):
     rehire_dt = serializers.CharField(max_length=20)
     work_phone = serializers.CharField(max_length=20)
     nid_country = serializers.CharField(max_length=20)
+
+    def get_std_hours(self, obj):
+        std_hours = obj.get('std_hours')
+        if std_hours == None:
+            return 0
+        else:
+            std_hours = str(int(std_hours))
+            return std_hours

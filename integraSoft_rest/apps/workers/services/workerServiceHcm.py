@@ -1,7 +1,7 @@
 from ...services.globalService import GlobalService
-from ..custom_exceptions import ExceptionJson, ExceptionWorkerHcm
+from ..custom_exceptions import ExceptionWorkerHcm
 from apps.parameters.models import Parameter, ParameterType
-from apps.logs.models import AuxiliarySessionUser
+from ...utils import log_entry
 
 class WorkerServiceHcm:
     def __init__(self):
@@ -45,7 +45,7 @@ class WorkerServiceHcm:
                     self.has_more = response.get('hasMore')
                     workers = self.convert_data_many(items)
 
-                    print("Tamaño de la lista: ", len(self.list_convert))
+                    # print("Tamaño de la lista: ", len(self.list_convert))
 
                     if self.list_convert_full == False and self.has_more == True:
                         self.offset_more_integrasoft = True
@@ -58,43 +58,17 @@ class WorkerServiceHcm:
             self.res = {
                 'items': workers,
                 'next': self.contador_registros if self.has_more else 0,
-                'previous': self.last_offset_param_integrasoft,
                 'count': len(workers),
                 'has_more': self.has_more,
-                'excluded_items': self.excluded_items,
-                'last_excluded_items': self.auxiliary_session_user(request),
                 'limit': self.limit_hcm,
                 'url': self.get_link_request(request)
-            }
-
-            print("----------Res----------- ")
-            print('next: ' + str(self.res['next']))
-            print('previous: ' + str(self.res['previous']))
-            print('count: ' + str(self.res['count']))
-            print('has_more: ' + str(self.res['has_more']))
-            # print('total_results: ' + str(self.res['total_results']))
-            print('excluded_items: ' + str(self.res['excluded_items']))
-            print('last_excluded_items: ' + str(self.res['last_excluded_items']))
-            print('limit: ' + str(self.res['limit']))
-            print("----------End_Res----------- ")
+            }            
             
-
+            log_entry(request.user, 'INFO', 'get_workers_hcm', 'Se ha consultado workers exitosamente')
+            
             return self.res
         except Exception as e:
             raise Exception(e) from e
-
-    def auxiliary_session_user(self, request):
-        user = request.user
-        # self.excluded_items = self.excluded_items - 1
-        if AuxiliarySessionUser.objects.filter(user=user).exists():
-            aux_session_user = AuxiliarySessionUser.objects.get(user=user)
-            last_excluded_items = aux_session_user.last_excluded_items
-            aux_session_user.last_excluded_items = self.excluded_items
-            aux_session_user.save()
-            return last_excluded_items
-        else:
-            AuxiliarySessionUser.objects.create(user=user, last_excluded_items=self.excluded_items)
-            return 0
 
     def get_worker_hcm(self, request):
         params = self.params_definition(request)
@@ -259,7 +233,7 @@ class WorkerServiceHcm:
         # Si hay department id, se filtra por el
         if self.department_id_param_integrasoft != 0:
             if assignments[0]['DepartmentId'] != self.department_id_param_integrasoft:
-                print("No | ", self.contador_registros , " | ", result.get('PersonNumber'), " | ", work_names[0]['DisplayName'], " | ", assignments[0]['DepartmentName'])
+                # print("No | ", self.contador_registros , " | ", result.get('PersonNumber'), " | ", work_names[0]['DisplayName'], " | ", assignments[0]['DepartmentName'])
                 return None
 
         # Datos de la persona
@@ -268,7 +242,7 @@ class WorkerServiceHcm:
         worker_data['display_name'] = work_names[0]['DisplayName']
         worker_data['department_name'] = assignments[0]['DepartmentName'] if assignments[0]['DepartmentName'] else None
 
-        print("Si | ", self.contador_registros , " | ", worker_data['person_number'], " | ", worker_data['display_name'], " | ", worker_data['department_name'])
+        # print("Si | ", self.contador_registros , " | ", worker_data['person_number'], " | ", worker_data['display_name'], " | ", worker_data['department_name'])
 
         return worker_data
 
@@ -371,11 +345,11 @@ class WorkerServiceHcm:
                     params['offset'] = self.offset_param_integrasoft + 1
                     self.contador_registros = self.offset_param_integrasoft
                 
-                print("Contador de registros: ", self.contador_registros)
+                # print("Contador de registros: ", self.contador_registros)
 
             params['orderBy'] = 'PersonNumber:desc'
         else:
             params['offset'] = 0
 
-        print("Parametros de la consulta: ", params)
+        log_entry(request.user, 'INFO', 'get_workers_hcm (params_definition)', f'Parametros de la consulta: {params}')
         return params

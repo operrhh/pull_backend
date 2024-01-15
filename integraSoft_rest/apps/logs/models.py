@@ -10,8 +10,3 @@ class LogEntry(models.Model):
 
     def __str__(self):
         return f'{self.timestamp} - {self.level} - {self.user.username} - {self.message}'
-
-class AuxiliarySessionUser(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='auxiliary_session_user')
-    timestamp = models.DateTimeField(auto_now_add=True)
-    last_excluded_items = models.IntegerField()

@@ -1,4 +1,32 @@
 from rest_framework import serializers
+from rest_framework.utils.urls import replace_query_param, remove_query_param
+
+class WorkersHcmBodySerializer(serializers.Serializer):
+    person_number = serializers.CharField(max_length=20, read_only=True)
+    display_name = serializers.CharField(max_length=50)
+    department_name = serializers.CharField(max_length=50)
+
+class WorkersHcmSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
+    # totalResults = serializers.IntegerField(source='total_results')
+    hasMore = serializers.BooleanField(source='has_more')
+    next = serializers.SerializerMethodField()
+    items = WorkersHcmBodySerializer(many=True)
+    limit = serializers.IntegerField()
+    url = serializers.CharField(max_length=100)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data.pop('url', None)
+        data.pop('limit', None)
+        return data
+
+    def get_next(self, obj):
+        _next = obj.get('next') + 1 # Agregamos 1 para que el offset sea legible para el usuario
+
+        if obj.get('has_more') == True:
+            return replace_query_param(obj.get('url'), 'offset', _next)
+        return None
 
 class WorkerHcmNamesSerializer(serializers.Serializer):
     legislation_code = serializers.CharField(source='LegislationCode',max_length=10)
@@ -106,8 +134,8 @@ class WorkerHcmWorkRelationshipsAssignmentsSerializer(serializers.Serializer):
     job_code = serializers.CharField(source='JobCode',max_length=20)
     department_id = serializers.CharField(source='DepartmentId',max_length=20)
     department_name = serializers.CharField(source='DepartmentName',max_length=100)
-    # location_id = serializers.CharField(source='LocationId',max_length=20)
-    # location_code = serializers.CharField(source='LocationCode',max_length=20)
+    location_id = serializers.CharField(source='LocationId',max_length=20)
+    location_code = serializers.CharField(source='LocationCode',max_length=20)
     # work_at_home_flag = serializers.CharField(source='WorkAtHomeFlag',max_length=20)
     # assignment_category = serializers.CharField(source='AssignmentCategory',max_length=20)
     # worker_category = serializers.CharField(source='WorkerCategory',max_length=20)
@@ -129,6 +157,8 @@ class WorkerHcmWorkRelationshipsAssignmentsSerializer(serializers.Serializer):
     last_updated_by = serializers.CharField(source='LastUpdatedBy',max_length=20)
     last_update_date = serializers.CharField(source='LastUpdateDate',max_length=20)
     ccu_codigo_centro_costo = serializers.CharField(source='CcuCodigoCentroCosto',max_length=20)
+    salary_amount = serializers.CharField(source='SalaryAmount',max_length=20)
+    manager = serializers.CharField(source='Manager',max_length=20)
     link = serializers.SerializerMethodField()
 
     def get_link(self, obj):
@@ -155,7 +185,8 @@ class WorkerHcmWorkRelationshipsSerializer(serializers.Serializer):
     last_updated_by = serializers.CharField(source='LastUpdatedBy',max_length=20)
     last_update_date = serializers.CharField(source='LastUpdateDate',max_length=20)
     projected_termination_date = serializers.CharField(source='ProjectedTerminationDate',max_length=20)
-    assignments = WorkerHcmWorkRelationshipsAssignmentsSerializer(many=True)    
+    # assignments = WorkerHcmWorkRelationshipsAssignmentsSerializer(many=True)
+    assignment = WorkerHcmWorkRelationshipsAssignmentsSerializer()
     link = serializers.SerializerMethodField()
 
     def get_link(self, obj):
@@ -180,6 +211,7 @@ class WorkerHcmSerializer(serializers.Serializer):
     phones = WorkerHcmPhonesSerializer(many=True)
     addresses = WorkerHcmAddressesSerializer(many=True)
     work_relationships = WorkerHcmWorkRelationshipsSerializer(many=True)
+    #work_relationships = WorkerHcmWorkRelationshipsSerializer()
     
     def get_link(self, obj):
         first_link = obj.get('links')[0].get('href')
@@ -207,6 +239,8 @@ class WorkerPeopleSoftSerializer(serializers.Serializer):
     city = serializers.CharField(max_length=20)
     county = serializers.CharField(max_length=20)
     state = serializers.CharField(max_length=20)
+    email = serializers.CharField(max_length=20)
+    email_type = serializers.CharField(max_length=20)
     home_phone = serializers.CharField(max_length=20)
     national_id_type = serializers.CharField(max_length=20)
     national_id = serializers.CharField(max_length=20)
@@ -239,7 +273,7 @@ class WorkerPeopleSoftSerializer(serializers.Serializer):
     paygroup = serializers.CharField(max_length=20)
     empl_type = serializers.CharField(max_length=20)
     holiday_schedule = serializers.CharField(max_length=20)
-    std_hours = serializers.CharField(max_length=20)
+    std_hours = serializers.SerializerMethodField()
     reg_region = serializers.CharField(max_length=20)
     jobtitle = serializers.CharField(max_length=20)
     jobtitle_abbrv = serializers.CharField(max_length=20)
@@ -248,3 +282,11 @@ class WorkerPeopleSoftSerializer(serializers.Serializer):
     rehire_dt = serializers.CharField(max_length=20)
     work_phone = serializers.CharField(max_length=20)
     nid_country = serializers.CharField(max_length=20)
+
+    def get_std_hours(self, obj):
+        std_hours = obj.get('std_hours')
+        if std_hours == None:
+            return 0
+        else:
+            std_hours = str(int(std_hours))
+            return std_hours

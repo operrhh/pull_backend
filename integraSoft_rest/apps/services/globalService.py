@@ -4,7 +4,7 @@ import requests
 import base64
 import cx_Oracle
 from ..parameters.models import Parameter, ParameterType
-
+from ..utils import log_entry
 
 class GlobalService:
     def __init__(self):
@@ -18,7 +18,7 @@ class GlobalService:
                                                                                                 .filter(FilterField1='authorization')
                                                                                                 .filter(FilterField2='people_soft')}
 
-    def generate_request(self, url, params={}, body_data={}):
+    def generate_request(self, request, url, params={}, body_data={}):
         credentials = f"{self.dic_authorization.get('user')}:{self.dic_authorization.get('pass')}"
         encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
         
@@ -31,6 +31,7 @@ class GlobalService:
             headers['Effective-of'] = "RangeMode=UPDATE;RangeStartDate=2023-08-04;RangeEndDate=2024-09-01"
             try:
                 response = requests.patch(url, headers=headers, json=body_data)
+
                 if response.status_code == 200:
                     return response.json()
                 else:
@@ -40,7 +41,7 @@ class GlobalService:
         else:
             try:
                 response = requests.get(url, headers=headers, params=params)
-                print(response.url)
+                log_entry(request.user, 'INFO', 'globalService', 'URL: ' + response.url)
                 if response.status_code == 200:
                     return response.json()
                 else:

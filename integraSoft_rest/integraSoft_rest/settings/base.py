@@ -32,6 +32,7 @@ LOCAL_APPS = [
     'apps.workers',
     'apps.parameters',
     'apps.logs',
+    'apps.departments',
 ]
 
 THIRD_APPS = [

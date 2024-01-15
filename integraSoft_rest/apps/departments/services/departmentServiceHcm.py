@@ -50,7 +50,7 @@ class DepartmentServiceHcm():
             return res
         except Exception as e:
             raise Exception(e) from e
-
+        
     def get_link_request(self,request):
         return request.build_absolute_uri()
 

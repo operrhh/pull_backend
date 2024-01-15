@@ -2,7 +2,7 @@ from django.db import connections
 import cx_Oracle
 import json
 from datetime import datetime
-
+from ...utils import log_entry
 
 from ..custom_exceptions import ExceptionWorkerPeopleSoft
 
@@ -35,6 +35,9 @@ class WorkerServicePeopleSoft:
                     items = [res for res in out_cur]
                     if len(items) > 0:
                         workers = self.convert_data(items)
+
+                        log_entry(request.user, 'INFO', 'get_workers_peoplesoft', 'Se ha consultado workers exitosamente')
+
                         return workers
                     else:
                         raise ExceptionWorkerPeopleSoft('No se han encontrado workers')
@@ -43,7 +46,7 @@ class WorkerServicePeopleSoft:
         except cx_Oracle.DatabaseError as e:
             print('Error de la base de datos:', e)
 
-    def get_worker_peoplesoft(self, pk):
+    def get_worker_peoplesoft(self, request, pk):
         try:
             with connections['people_soft'].cursor() as cursor:
                 out_cur = cursor.connection.cursor()
@@ -52,6 +55,9 @@ class WorkerServicePeopleSoft:
                 if out_cur:
                     items = out_cur.fetchone()
                     worker = self.convert_data(items)
+
+                    log_entry(request.user, 'INFO', 'get_worker_peoplesoft', 'Se ha consultado worker exitosamente')
+
                     return worker
                 else:
                     raise ExceptionWorkerPeopleSoft('No se han encontrado workers')

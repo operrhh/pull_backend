@@ -16,6 +16,7 @@ class WorkerServiceHcm:
         self.department_id_param_integrasoft: int = 0
         self.offset_param_integrasoft: int = 0
         self.last_offset_param_integrasoft: int = 0
+        self.request = None
 
         # Parametros de uso general
         self.contador_registros: int = 0
@@ -37,6 +38,7 @@ class WorkerServiceHcm:
 
     def get_workers_hcm(self, request):
         try:
+            self.request = request
             params = self.params_definition(request)
             response = self.global_service.generate_request(request=request,url=self.dic_url.get('worker'), params=params)
             if response:
@@ -64,16 +66,17 @@ class WorkerServiceHcm:
                 'url': self.get_link_request(request)
             }            
             
-            log_entry(request.user, 'INFO', 'get_workers_hcm', 'Se ha consultado workers exitosamente')
+            log_entry(request.user, 'INFO', 'get workers hcm', 'Se ha consultado workers exitosamente')
             
             return self.res
         except Exception as e:
             raise Exception(e) from e
 
     def get_worker_hcm(self, request):
-        params = self.params_definition(request)
         try:
-            response = self.global_service.generate_request(self.dic_url.get('worker'), params)
+            self.request = request
+            params = self.params_definition(request)            
+            response = self.global_service.generate_request(request=request,url=self.dic_url.get('worker'), params=params)
             if response:
                 if response.get('count') != 0:
                     item = response.get('items')
@@ -94,7 +97,7 @@ class WorkerServiceHcm:
         params['q'] = f"departmentsEFF.CategoryCode='DEPARTMENT' and OrganizationId={department_id}"
         params['expand'] = 'departmentsDFF'
         try:
-            response = self.global_service.generate_request(self.dic_url.get('department'),params=params)
+            response = self.global_service.generate_request(request=self.request,url=self.dic_url.get('department'),params=params)
             if response:
                 if response.get('count') != 0:
                     department = response.get('items')[0]
@@ -195,10 +198,13 @@ class WorkerServiceHcm:
         params['q'] = f"AssignmentId={assignmentd_id}"
         params['orderBy'] = 'DateTo:desc'
         try:
-            response = self.global_service.generate_request(self.dic_url.get('salary'),params=params)
+            response = self.global_service.generate_request(request=self.request,url=self.dic_url.get('salary'),params=params)
             if response:
                 if response.get('count') != 0:
                     salary = response.get('items')[0]
+
+                    log_entry(self.request.user, 'INFO', 'get salary hcm', 'Se ha consultado salary exitosamente')
+
                     return salary.get('SalaryAmount')
                 else:
                     return 0
@@ -351,5 +357,5 @@ class WorkerServiceHcm:
         else:
             params['offset'] = 0
 
-        log_entry(request.user, 'INFO', 'get_workers_hcm (params_definition)', f'Parametros de la consulta: {params}')
+        log_entry(request.user, 'INFO', 'get workers hcm (params definition)', f'Parametros de la consulta: {params}')
         return params

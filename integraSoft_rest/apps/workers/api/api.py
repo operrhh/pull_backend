@@ -61,6 +61,8 @@ def workers_hcm_api_view(request):
 
 # region PeopleSoft
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def workers_peoplesoft_api_view(request):
     if request.method == 'GET':
         worker_service = WorkerServicePeopleSoft()
@@ -78,11 +80,13 @@ def workers_peoplesoft_api_view(request):
             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def worker_peoplesoft_api_view(request,pk):
     if request.method == 'GET':
         worker_service = WorkerServicePeopleSoft()
         try:
-            worker = worker_service.get_worker_peoplesoft(pk)
+            worker = worker_service.get_worker_peoplesoft(request, pk)
             if worker:
                 worker_serializer = WorkerPeopleSoftSerializer(worker)
                 return Response(worker_serializer.data, status = status.HTTP_200_OK)

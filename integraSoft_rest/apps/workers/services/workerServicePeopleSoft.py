@@ -78,7 +78,7 @@ class WorkerServicePeopleSoft:
         for i, field_name in enumerate(self.field_names):
             if not self.validate_none(data[i]):
                 if field_name in ['birthdate', 'birthplace', 'orig_hire_dt', 'cmpny_seniority_dt', 'service_dt',
-                                  'last_increase_dt', 'effdt', 'hire_dt', 'action_dt', 'job_entry_dt', 'dept_entry_dt'] and not isinstance(data[i], str):
+                                  'last_increase_dt', 'effdt', 'hire_dt', 'action_dt', 'job_entry_dt', 'dept_entry_dt', 'rehire_dt'] and not isinstance(data[i], str):
                     worker_data[field_name] = self.serialize_datetime(data[i])
                 else:
                     worker_data[field_name] = data[i]
@@ -98,6 +98,6 @@ class WorkerServicePeopleSoft:
 
     def serialize_datetime(self,obj):
         if isinstance(obj, datetime):
-            return obj.isoformat()
-            # return obj.strftime('%Y-%m-%d')
+            #return obj.isoformat()
+            return obj.strftime('%Y-%m-%d')
         raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")

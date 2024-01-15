@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+
+  env_container:
+    build:
+      context: .
+      dockerfile: Dockerfile.env
+    depends_on:
+      - web
+
+

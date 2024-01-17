@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,11 +46,15 @@ THIRD_APPS = [
 
 INSTALLED_APPS =  BASE_APPS + LOCAL_APPS + THIRD_APPS
 
+
+# Duración del token en segundos
+TOKEN_EXPIRED_AFTER_SECONDS = (60 * 60 * 24) * 2
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'apps.custom_authentication.CustomTokenAuthentication',
     ],
-    # 'DEFAULT_TOKEN_AGE': timedelta(days=1),  # Duración del token
 }
 
 MIDDLEWARE = [
@@ -106,11 +111,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'es-CL'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC-3'
+TIME_ZONE = 'America/Santiago'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 AUTH_USER_MODEL = 'users.User'
 

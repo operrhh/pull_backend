@@ -2,8 +2,10 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+
+from ...custom_authentication import CustomTokenAuthentication
+
 
 #Paginations
 from ..pagination import CustomPaginationPeopleSoft
@@ -17,7 +19,7 @@ from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 
 # region HCM
 @api_view(['GET', 'PUT', 'POST'])
-@authentication_classes([TokenAuthentication])
+@authentication_classes([CustomTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def workers_hcm_api_view(request):
     try:
@@ -61,7 +63,7 @@ def workers_hcm_api_view(request):
 
 # region PeopleSoft
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication])
+@authentication_classes([CustomTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def workers_peoplesoft_api_view(request):
     if request.method == 'GET':
@@ -80,7 +82,7 @@ def workers_peoplesoft_api_view(request):
             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication])
+@authentication_classes([CustomTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def worker_peoplesoft_api_view(request,pk):
     if request.method == 'GET':

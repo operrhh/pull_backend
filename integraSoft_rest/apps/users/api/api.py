@@ -1,3 +1,4 @@
+from ...custom_authentication import CustomTokenAuthentication
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAdminUser, AllowAny
 from django.contrib.auth import authenticate, login
@@ -16,7 +17,7 @@ from apps.users.api.serializers import UserSerializer, UserListSerializer, UserL
 
 
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication])
+@authentication_classes([CustomTokenAuthentication])
 @permission_classes([AllowAny])
 def user_api_view(request):
     if request.method == 'GET':
@@ -36,7 +37,7 @@ def user_create_api_view(request):
 
 
 @api_view(['GET','PUT','DELETE'])
-@authentication_classes([TokenAuthentication])
+@authentication_classes([CustomTokenAuthentication])
 @permission_classes([IsAdminUser])
 def user_detail_api_view(request, pk=None):
     

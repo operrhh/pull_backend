@@ -5,11 +5,34 @@ from ...utils import log_entry
 
 class WorkerServiceHcm:
     def __init__(self):
-        self.dic_parameter_type = {param.Description: param.id for param in ParameterType.objects.all()}
-        self.dic_url = {param.FilterField3: param.Value for param in Parameter.objects  .filter(ParameterTypeId=self.dic_parameter_type.get('url'))
-                                                                                        .filter(Enabled=True)
-                                                                                        .filter(FilterField1='url')
-                                                                                        .filter(FilterField2='hcm')}
+        self.dic_parameter_type = {
+            param.Description: param.id for param in ParameterType.objects.all()
+        }
+
+        self.dic_url = {
+            param.FilterField3: param.Value for param in Parameter.objects
+                .filter(ParameterTypeId=self.dic_parameter_type.get('url'))
+                .filter(Enabled=True)
+                .filter(FilterField1='url')
+                .filter(FilterField2='hcm')
+        }
+        
+        self.dic_size_request_hcm = {
+            param.FilterField3: param.Value for param in Parameter.objects 
+                .filter(ParameterTypeId=self.dic_parameter_type.get('size_request'))
+                .filter(Enabled=True)
+                .filter(FilterField1='size_request')
+                .filter(FilterField2='hcm')
+        }
+
+        self.dic_size_request_integrasoft = {
+            param.FilterField3: param.Value for param in Parameter.objects
+                .filter(ParameterTypeId=self.dic_parameter_type.get('size_request'))
+                .filter(Enabled=True)
+                .filter(FilterField1='size_request')
+                .filter(FilterField2='integrasoft')
+        }
+                
         self.global_service = GlobalService()
 
         # Parametros que vienen en la request
@@ -28,12 +51,12 @@ class WorkerServiceHcm:
         self.res = {}
 
         # Parametros para la paginacion de hcm
-        self.limit_hcm = 30 # Este parametro es para la cantidad de registros que se retornan en hcm
+        self.limit_hcm = int(self.dic_size_request_hcm.get('worker')) # Este parametro es para la cantidad de registros que se retornan en hcm
         self.has_more = False
         self.total_results: int = 0
 
         # Parametros para la paginacion de integraSoft
-        self.limit_integrasoft = 20 # Este parametro es para la cantidad de registros que se retornan en integraSoft
+        self.limit_integrasoft = int(self.dic_size_request_integrasoft.get('worker')) # Este parametro es para la cantidad de registros que se retornan en integraSoft
         self.offset_more_integrasoft = False
 
     def get_workers_hcm(self, request):
@@ -47,7 +70,7 @@ class WorkerServiceHcm:
                     self.has_more = response.get('hasMore')
                     workers = self.convert_data_many(items)
 
-                    # print("Tamaño de la lista: ", len(self.list_convert))
+                    print("Tamaño de la lista: ", len(self.list_convert))
 
                     if self.list_convert_full == False and self.has_more == True:
                         self.offset_more_integrasoft = True
@@ -118,24 +141,24 @@ class WorkerServiceHcm:
 
     def create_worker_data_details(self, result):
         worker_data: dict = {
-                'person_id': result.get('PersonId'),
-                'person_number': result.get('PersonNumber'),
-                'date_of_birth': result.get('DateOfBirth'),
-                'date_of_death': result.get('DateOfDeath'),
-                'country_of_birth': result.get('CountryOfBirth'),
-                'region_of_birth': result.get('RegionOfBirth'),
-                'town_of_birth': result.get('TownOfBirth'),
-                'created_by': result.get('CreatedBy'),
-                'creation_date': result.get('CreationDate'),
-                'last_updated_by': result.get('LastUpdatedBy'),
-                'last_update_date': result.get('LastUpdateDate'),
-                'names': result.get('names').get('items', []),
-                'emails': result.get('emails').get('items', []),
-                'addresses': result.get('addresses').get('items', []),
-                'phones': result.get('phones').get('items', []),
-                'work_relationships': [], # Realizamos un trabajo adicional para obtener los assignments
-                'links': result.get('links', [])
-            }
+            'person_id': result.get('PersonId'),
+            'person_number': result.get('PersonNumber'),
+            'date_of_birth': result.get('DateOfBirth'),
+            'date_of_death': result.get('DateOfDeath'),
+            'country_of_birth': result.get('CountryOfBirth'),
+            'region_of_birth': result.get('RegionOfBirth'),
+            'town_of_birth': result.get('TownOfBirth'),
+            'created_by': result.get('CreatedBy'),
+            'creation_date': result.get('CreationDate'),
+            'last_updated_by': result.get('LastUpdatedBy'),
+            'last_update_date': result.get('LastUpdateDate'),
+            'names': result.get('names').get('items', []),
+            'emails': result.get('emails').get('items', []),
+            'addresses': result.get('addresses').get('items', []),
+            'phones': result.get('phones').get('items', []),
+            'work_relationships': [], # Realizamos un trabajo adicional para obtener los assignments
+            'links': result.get('links', [])
+        }
         
         work_relationships = result.get('workRelationships', {}).get('items', [])
 

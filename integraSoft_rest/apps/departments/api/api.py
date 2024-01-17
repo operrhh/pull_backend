@@ -1,5 +1,5 @@
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAdminUser, AllowAny
+from ...custom_authentication import CustomTokenAuthentication
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -20,7 +20,7 @@ from .serializers import DepartmentHcmSerializer, DepartmentSerializer
 # HCM
 
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication])
+@authentication_classes([CustomTokenAuthentication])
 @permission_classes([AllowAny])
 def departments_hcm_api_view(request):
     try:
@@ -38,7 +38,7 @@ def departments_hcm_api_view(request):
 # PeopleSoft
 
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication])
+@authentication_classes([CustomTokenAuthentication])
 @permission_classes([AllowAny])
 def departments_peoplesoft_api_view(request):
     try:

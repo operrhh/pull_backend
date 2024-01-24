@@ -25,7 +25,6 @@ from .serializers import DepartmentHcmSerializer, DepartmentSerializer
 def departments_hcm_api_view(request):
     try:
         department_service = DepartmentServiceHcm()
-
         if request.method == 'GET':
             departments = department_service.get_departments(request)
             if departments:

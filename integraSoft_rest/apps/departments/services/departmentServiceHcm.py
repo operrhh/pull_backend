@@ -1,6 +1,8 @@
 from ...services.globalService import GlobalService
 from ...parameters.models import Parameter, ParameterType
 from ..models import Department
+from ...utils import log_entry
+
 
 class DepartmentServiceHcm():
     def __init__(self):
@@ -30,22 +32,22 @@ class DepartmentServiceHcm():
                 if response.get('count') != 0:
                     items = response.get('items')
                     self.has_more = response.get('hasMore')
-                    self.total_results = response.get('totalResults')
                     self.convert_departments(items)
                 else:
                     raise Exception('No se encontraron departments')
             else:
-                raise Exception('Error al consultar departments')            
+                raise Exception('Error al consultar departments')
+
             res = {
                 'items': self.departments,
                 'next': self.contador_registros if self.has_more else 0,
-                'previous': self.last_offset,
                 'count': len(self.departments),                
                 'has_more': self.has_more,
-                'total_results': self.total_results,
                 'limit': self.limit,
                 'url': self.get_link_request(request)
             }
+
+            log_entry(request.user, 'INFO', 'GET Departments hcm', 'Se ha consultado Departments exitosamente')
 
             return res
         except Exception as e:
@@ -55,7 +57,6 @@ class DepartmentServiceHcm():
         return request.build_absolute_uri()
 
     def params_definition(self, request):
-        # self.offset = int(request.query_params.get('offset')) if request.query_params.get('offset') else self.offset
         self.offset = int(request.query_params.get('offset', self.offset))
         self.offset = self.offset - 1
 

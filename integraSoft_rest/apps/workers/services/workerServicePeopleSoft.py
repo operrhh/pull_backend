@@ -44,7 +44,7 @@ class WorkerServicePeopleSoft:
                 else:
                     raise ExceptionWorkerPeopleSoft('No se han encontrado workers')
         except cx_Oracle.DatabaseError as e:
-            print('Error de la base de datos:', e)
+            raise ExceptionWorkerPeopleSoft('Error de la base de datos: ' + str(e))
 
     def get_worker_peoplesoft(self, request, pk):
         try:
@@ -62,7 +62,7 @@ class WorkerServicePeopleSoft:
                 else:
                     raise ExceptionWorkerPeopleSoft('No se han encontrado workers')
         except cx_Oracle.DatabaseError as e:
-            print('Error de la base de datos:', e)
+            raise ExceptionWorkerPeopleSoft('Error de la base de datos: ' + str(e))
 
     def update_worker_peoplesoft(self, request):
         # Crear un diccionario con los nombres de los atributos y sus valores

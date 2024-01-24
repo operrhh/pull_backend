@@ -8,7 +8,6 @@ class WorkersHcmBodySerializer(serializers.Serializer):
 
 class WorkersHcmSerializer(serializers.Serializer):
     count = serializers.IntegerField()
-    # totalResults = serializers.IntegerField(source='total_results')
     hasMore = serializers.BooleanField(source='has_more')
     next = serializers.SerializerMethodField()
     items = WorkersHcmBodySerializer(many=True)

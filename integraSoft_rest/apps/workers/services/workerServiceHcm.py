@@ -32,8 +32,9 @@ class WorkerServiceHcm:
                 .filter(FilterField1='size_request')
                 .filter(FilterField2='integrasoft')
         }
-                
+
         self.global_service = GlobalService()
+
 
         # Parametros que vienen en la request
         self.department_id_param_integrasoft: int = 0
@@ -318,7 +319,6 @@ class WorkerServiceHcm:
         legislation_code = request.query_params.get('legislationCode', 'CL')
         self.department_id_param_integrasoft = int(request.query_params.get('department', 0))
 
-        # self.offset_param_integrasoft = int(request.query_params.get('offset', 1))
         self.offset_param_integrasoft = int(request.query_params.get('offset', 0))
         self.offset_param_integrasoft = self.offset_param_integrasoft - 1
 

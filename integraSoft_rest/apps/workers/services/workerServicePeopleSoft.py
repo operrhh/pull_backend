@@ -17,7 +17,8 @@ class WorkerServicePeopleSoft:
             'effdt', 'hire_dt', 'supervisor_id', 'business_unit', 'business_unit_descr', 'deptid','dept_descr', 'jobcode', 'action',
             'action_dt', 'action_reason', 'location', 'job_entry_dt', 'dept_entry_dt', 'reg_temp', 'full_part_time',
             'company', 'paygroup', 'empl_type', 'holiday_schedule', 'std_hours', 'reg_region', 'jobtitle', 'jobtitle_abbrv',
-            'deptname', 'deptname_abbrv', 'rehire_dt', 'work_phone', 'nid_country'
+            'deptname', 'deptname_abbrv', 'rehire_dt', 'work_phone', 'nid_country', 'annual_rt', 'monthly_rt', 'daily_rt',
+            'hourly_rt'
         ]
 
     def get_workers_peoplesoft(self, request):
@@ -30,6 +31,9 @@ class WorkerServicePeopleSoft:
         try:
             with connections['people_soft'].cursor() as cursor:
                 out_cur = cursor.connection.cursor()
+
+                log_entry(request.user, 'INFO', 'get_workers_peoplesoft', 'Parametros de consulta: ' + str(person_number) + ' | ' + str(first_name) + ' | ' + str(last_name) + ' ' + str(department) )
+
                 cursor.callproc("SP_GET_WORKERS", [out_cur, person_number, first_name, last_name, department])
                 if out_cur:
                     items = [res for res in out_cur]

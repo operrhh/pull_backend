@@ -160,7 +160,7 @@ class WorkerServiceHcm:
             'work_relationships': [], # Realizamos un trabajo adicional para obtener los assignments
             'links': result.get('links', [])
         }
-        
+
         work_relationships = result.get('workRelationships', {}).get('items', [])
 
         # Se obtiene el ultimo work_relationship
@@ -201,6 +201,8 @@ class WorkerServiceHcm:
         del last_work_relationship['assignments']
 
         last_work_relationship['assignment'] = last_assignment
+
+                
 
         worker_data['work_relationships'].append(last_work_relationship)
 
@@ -329,7 +331,7 @@ class WorkerServiceHcm:
         AND_CONDITION = ' AND '
 
         if person_number:
-            query_params += f"PersonNumber like '{person_number}%'"
+            query_params += f"upper(PersonNumber) like '{person_number.upper()}%'"
             conditions_added = True
         if first_name:
             if conditions_added:

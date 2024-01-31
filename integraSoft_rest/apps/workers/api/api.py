@@ -6,7 +6,6 @@ from rest_framework.permissions import IsAuthenticated
 
 from ...custom_authentication import CustomTokenAuthentication
 
-
 #Paginations
 from ..pagination import CustomPaginationPeopleSoft
 

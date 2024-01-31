@@ -8,7 +8,6 @@ class WorkersHcmBodySerializer(serializers.Serializer):
 
 class WorkersHcmSerializer(serializers.Serializer):
     count = serializers.IntegerField()
-    # totalResults = serializers.IntegerField(source='total_results')
     hasMore = serializers.BooleanField(source='has_more')
     next = serializers.SerializerMethodField()
     items = WorkersHcmBodySerializer(many=True)
@@ -30,13 +29,14 @@ class WorkersHcmSerializer(serializers.Serializer):
 
 class WorkerHcmNamesSerializer(serializers.Serializer):
     legislation_code = serializers.CharField(source='LegislationCode',max_length=10)
-    last_name = serializers.CharField(source='LastName',max_length=20)
     first_name = serializers.CharField(source='FirstName',max_length=20)
+    last_name = serializers.CharField(source='LastName',max_length=20)
     middle_names = serializers.CharField(source='MiddleNames',max_length=20)
     display_name = serializers.CharField(source='DisplayName',max_length=20)
     order_name = serializers.CharField(source='OrderName',max_length=20)
     list_name = serializers.CharField(source='ListName',max_length=20)
     full_name = serializers.CharField(source='FullName',max_length=20)
+    complete_name = serializers.SerializerMethodField()
     name_language = serializers.CharField(source='NameLanguage',max_length=20)
     created_by = serializers.CharField(source='CreatedBy',max_length=20)
     creation_date = serializers.CharField(source='CreationDate',max_length=20)
@@ -47,6 +47,25 @@ class WorkerHcmNamesSerializer(serializers.Serializer):
     def get_link(self, obj):
         first_link = obj.get('links')[0].get('href')
         return first_link
+    
+    def get_complete_name(self, obj):
+        first_name = obj.get('FirstName').split(' ')
+        last_name = obj.get('LastName').split(' ')
+        middle_names = obj.get('MiddleNames').split(' ')
+
+        first_name = self.format_name(first_name)
+        last_name = self.format_name(last_name)
+        middle_names = self.format_name(middle_names)
+        complete_name = f"{first_name}{last_name}{middle_names}"
+
+        return complete_name
+
+    def format_name(self, list_name: list):
+        clean_name = ''
+        for name in list_name:
+            if name != '':
+                clean_name += f"{name} "
+        return clean_name
 
 class WorkerHcmEmailsSerializer(serializers.Serializer):
     email_address_id = serializers.CharField(source='EmailAddressId',max_length=30)
@@ -170,6 +189,7 @@ class WorkerHcmWorkRelationshipsSerializer(serializers.Serializer):
     legislation_code = serializers.CharField(source='LegislationCode',max_length=20)
     legal_entity_id = serializers.CharField(source='LegalEntityId',max_length=20)
     legal_employer_name = serializers.CharField(source='LegalEmployerName',max_length=20)
+    legal_employer_code = serializers.SerializerMethodField()
     worker_type = serializers.CharField(source='WorkerType',max_length=20)
     primary_flag = serializers.CharField(source='PrimaryFlag',max_length=20)
     start_date = serializers.CharField(source='StartDate',max_length=20)
@@ -192,6 +212,12 @@ class WorkerHcmWorkRelationshipsSerializer(serializers.Serializer):
     def get_link(self, obj):
         first_link = obj.get('links')[0].get('href')
         return first_link
+    
+    def get_legal_employer_code(self, obj):
+        legal_employer_name = obj.get('LegalEmployerName')
+        legal_employer_name_split = legal_employer_name.split(' ')
+        legal_employer_code = legal_employer_name_split[0]
+        return legal_employer_code
 
 class WorkerHcmSerializer(serializers.Serializer):
     person_id = serializers.CharField(max_length=20, read_only=True)
@@ -282,6 +308,10 @@ class WorkerPeopleSoftSerializer(serializers.Serializer):
     rehire_dt = serializers.CharField(max_length=20)
     work_phone = serializers.CharField(max_length=20)
     nid_country = serializers.CharField(max_length=20)
+    annual_rt = serializers.CharField(max_length=20)
+    monthly_rt = serializers.CharField(max_length=20)
+    daily_rt = serializers.CharField(max_length=20)
+    hourly_rt = serializers.CharField(max_length=20)
 
     def get_std_hours(self, obj):
         std_hours = obj.get('std_hours')

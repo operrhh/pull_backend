@@ -32,8 +32,9 @@ class WorkerServiceHcm:
                 .filter(FilterField1='size_request')
                 .filter(FilterField2='integrasoft')
         }
-                
+
         self.global_service = GlobalService()
+
 
         # Parametros que vienen en la request
         self.department_id_param_integrasoft: int = 0
@@ -159,7 +160,7 @@ class WorkerServiceHcm:
             'work_relationships': [], # Realizamos un trabajo adicional para obtener los assignments
             'links': result.get('links', [])
         }
-        
+
         work_relationships = result.get('workRelationships', {}).get('items', [])
 
         # Se obtiene el ultimo work_relationship
@@ -200,6 +201,8 @@ class WorkerServiceHcm:
         del last_work_relationship['assignments']
 
         last_work_relationship['assignment'] = last_assignment
+
+                
 
         worker_data['work_relationships'].append(last_work_relationship)
 
@@ -318,7 +321,6 @@ class WorkerServiceHcm:
         legislation_code = request.query_params.get('legislationCode', 'CL')
         self.department_id_param_integrasoft = int(request.query_params.get('department', 0))
 
-        # self.offset_param_integrasoft = int(request.query_params.get('offset', 1))
         self.offset_param_integrasoft = int(request.query_params.get('offset', 0))
         self.offset_param_integrasoft = self.offset_param_integrasoft - 1
 
@@ -329,7 +331,7 @@ class WorkerServiceHcm:
         AND_CONDITION = ' AND '
 
         if person_number:
-            query_params += f"PersonNumber like '{person_number}%'"
+            query_params += f"upper(PersonNumber) like '{person_number.upper()}%'"
             conditions_added = True
         if first_name:
             if conditions_added:

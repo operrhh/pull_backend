@@ -1,5 +1,4 @@
 from ...custom_authentication import CustomTokenAuthentication
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAdminUser, AllowAny
 from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token

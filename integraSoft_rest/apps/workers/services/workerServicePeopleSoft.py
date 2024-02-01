@@ -32,7 +32,7 @@ class WorkerServicePeopleSoft:
             with connections['people_soft'].cursor() as cursor:
                 out_cur = cursor.connection.cursor()
 
-                log_entry(request.user, 'INFO', 'get_workers_peoplesoft', 'Parametros de consulta: ' + str(person_number) + ' | ' + str(first_name) + ' | ' + str(last_name) + ' ' + str(department) )
+                log_entry(request.user, 'INFO', 'get_workers_peoplesoft', 'Parametros de consulta: ' + str(person_number) + ' | ' + str(first_name) + ' | ' + str(last_name) + ' | ' + str(department) )
 
                 cursor.callproc("SP_GET_WORKERS", [out_cur, person_number, first_name, last_name, department])
                 if out_cur:

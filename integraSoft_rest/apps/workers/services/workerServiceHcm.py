@@ -182,8 +182,7 @@ class WorkerServiceHcm:
             last_assignment['CcuCodigoCentroCosto'] = None
 
         # Se obtiene el salario de last_assignment
-        salary_decimal = self.get_salary_hcm(last_assignment['AssignmentId'])
-        salary = str(int(salary_decimal))
+        salary = self.get_salary_hcm(last_assignment['AssignmentId'])
         last_assignment['SalaryAmount'] = salary
 
         # Se obtiene el manager valido de last_assignment
@@ -201,8 +200,6 @@ class WorkerServiceHcm:
         del last_work_relationship['assignments']
 
         last_work_relationship['assignment'] = last_assignment
-
-                
 
         worker_data['work_relationships'].append(last_work_relationship)
 

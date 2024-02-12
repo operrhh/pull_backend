@@ -49,9 +49,24 @@ class WorkerHcmNamesSerializer(serializers.Serializer):
         return first_link
     
     def get_complete_name(self, obj):
-        first_name = obj.get('FirstName').split(' ')
-        last_name = obj.get('LastName').split(' ')
-        middle_names = obj.get('MiddleNames').split(' ')
+        
+        first_name = obj.get('FirstName')
+        if first_name == None:
+            first_name = ''
+        else:
+            first_name = first_name.split(' ')
+
+        last_name = obj.get('LastName')
+        if last_name == None:
+            last_name = ''
+        else:
+            last_name = last_name.split(' ')
+        
+        middle_names = obj.get('MiddleNames')
+        if middle_names == None:
+            middle_names = ''
+        else:
+            middle_names = middle_names.split(' ')
 
         first_name = self.format_name(first_name)
         last_name = self.format_name(last_name)
@@ -215,9 +230,12 @@ class WorkerHcmWorkRelationshipsSerializer(serializers.Serializer):
     
     def get_legal_employer_code(self, obj):
         legal_employer_name = obj.get('LegalEmployerName')
-        legal_employer_name_split = legal_employer_name.split(' ')
-        legal_employer_code = legal_employer_name_split[0]
-        return legal_employer_code
+        if legal_employer_name == None:
+            return ''
+        else:
+            legal_employer_name_split = legal_employer_name.split(' ')
+            legal_employer_code = legal_employer_name_split[0]
+            return legal_employer_code
 
 class WorkerHcmSerializer(serializers.Serializer):
     person_id = serializers.CharField(max_length=20, read_only=True)

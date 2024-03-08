@@ -41,7 +41,10 @@ THIRD_APPS = [
     'rest_framework.authtoken',
     'requests',
     'cx_Oracle',
-    'simple_history'
+    'simple_history',
+    'zeep',
+    'pandas',
+    'openpyxl',
 ]
 
 INSTALLED_APPS =  BASE_APPS + LOCAL_APPS + THIRD_APPS

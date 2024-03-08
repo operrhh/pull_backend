@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.utils.urls import replace_query_param, remove_query_param
+from rest_framework.utils.urls import replace_query_param
 
 class WorkersHcmBodySerializer(serializers.Serializer):
     person_number = serializers.CharField(max_length=20, read_only=True)
@@ -338,3 +338,65 @@ class WorkerPeopleSoftSerializer(serializers.Serializer):
         else:
             std_hours = str(int(std_hours))
             return std_hours
+
+
+class WorkersWsdlBodySerializer(serializers.Serializer):   
+    person_number = serializers.CharField(max_length=20)
+    start_date = serializers.CharField(max_length=20)
+    first_name = serializers.CharField(max_length=20)
+    last_name = serializers.CharField(max_length=20)
+    middle_names = serializers.CharField(max_length=20)
+    display_name = serializers.CharField(max_length=20)
+    complete_name = serializers.SerializerMethodField()
+    email_emplid = serializers.CharField(max_length=20)
+    job_name = serializers.CharField(max_length=20)
+    legal_entity_name = serializers.CharField(max_length=20)
+    hdr_person_location = serializers.CharField(max_length=20)
+    hdr_person_department = serializers.CharField(max_length=20)
+    id_jefe = serializers.CharField(max_length=20)
+    nombre_jefe = serializers.CharField(max_length=20)
+    email_manager = serializers.CharField(max_length=20)
+    salary_amount = serializers.CharField(max_length=20)
+    address_type = serializers.CharField(max_length=20)
+    address_line_1 = serializers.CharField(max_length=20)
+    address_line_2 = serializers.CharField(max_length=20)
+    address_line_3 = serializers.CharField(max_length=20)
+    address_line_4 = serializers.CharField(max_length=20)
+    town_or_city = serializers.CharField(max_length=20)
+
+    def get_complete_name(self, obj):
+        first_name = obj.get('first_name')
+        if first_name == None:
+            first_name = ''
+        else:
+            first_name = first_name.split(' ')
+
+        last_name = obj.get('last_name')
+        if last_name == None:
+            last_name = ''
+        else:
+            last_name = last_name.split(' ')
+        
+        middle_names = obj.get('middle_names')
+        if middle_names == None:
+            middle_names = ''
+        else:
+            middle_names = middle_names.split(' ')
+
+        first_name = self.format_name(first_name)
+        last_name = self.format_name(last_name)
+        middle_names = self.format_name(middle_names)
+        complete_name = f"{first_name}{last_name}{middle_names}"
+
+        return complete_name
+    
+    def format_name(self, list_name: list):
+        clean_name = ''
+        for name in list_name:
+            if name != '':
+                clean_name += f"{name} "
+        return clean_name
+
+class WorkersWsdlSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
+    result = WorkersWsdlBodySerializer(many=True)

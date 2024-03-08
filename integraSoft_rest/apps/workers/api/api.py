@@ -10,11 +10,13 @@ from ...custom_authentication import CustomTokenAuthentication
 from ..pagination import CustomPaginationPeopleSoft
 
 #Serializers
-from .serializers import WorkerHcmSerializer, WorkersHcmSerializer, WorkerPeopleSoftSerializer
+from .serializers import WorkerHcmSerializer, WorkersHcmSerializer, WorkerPeopleSoftSerializer, WorkersWsdlSerializer
 
 # Services
 from ..services.workerServiceHcm import WorkerServiceHcm
 from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
+from ..services.workerServiceWsdl import WorkerServiceWsdl
+from ..services.worker_comparison import WorkerComparison
 
 # region HCM
 @api_view(['GET', 'PUT', 'POST'])
@@ -94,3 +96,33 @@ def worker_peoplesoft_api_view(request,pk):
         except Exception as e:
             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
 # endregion
+
+
+# region WSDL
+@api_view(['GET'])
+def workers_wsdl_api_view(request):
+    try:
+        worker_service = WorkerServiceWsdl()
+        if request.method == 'GET':
+            workers = worker_service.get_workers_wsdl()
+            if workers:
+                workers_serializer = WorkersWsdlSerializer(workers)
+                return Response(workers_serializer.data, status = status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'message': str(e)})
+
+# endregion
+
+# region Comparison
+@api_view(['GET'])
+@authentication_classes([CustomTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def workers_comparison_api_view(request):
+    try:
+        worker_service = WorkerComparison()
+        if request.method == 'GET':
+            workers = worker_service.get_workers_comparison(request)
+            if workers:
+                return Response(workers, status = status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'message': str(e)})

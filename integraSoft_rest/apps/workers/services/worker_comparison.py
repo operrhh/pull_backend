@@ -11,8 +11,9 @@ class WorkerFormatComparison:
     #     instance.__init__(formatted_person_number)
     #     return instance
 
-    def __init__(self, person_number: str):
+    def __init__(self, person_number: str, name: str = ''):
         self.person_number: str = self.format_person_number( person_number)
+        self.name: str = name
 
     @staticmethod
     def format_person_number(person_number: str):
@@ -39,14 +40,81 @@ class WorkerComparison:
         except Exception as e:
             raise Exception(e) from e
 
+    def format_workers_by_peoplesoft(self, workers: list):
+        try:
+            new_workers = []
+            for worker in workers:
+                wr = WorkerFormatComparison(
+                    person_number = worker['emplid'],
+                    name = worker['name']
+                )
+                new_workers.append(wr)
+
+            return new_workers
+        except Exception as e:
+            raise Exception(e) from e
+
+    def format_workers_by_wsdl(self, workers: list):
+        try:
+            new_workers = []
+            workers = workers['result']
+            for worker in workers:
+
+                name_format = self.get_complete_name(worker['first_name'], worker['last_name'], worker['middle_names'])
+
+                wr = WorkerFormatComparison(
+                    person_number = worker['person_number'],
+                    name = name_format
+                )
+                new_workers.append(wr)
+
+            return new_workers
+        except Exception as e:
+            raise Exception(e) from e
+
+    def get_complete_name(self, first_name: str, last_name: str, middle_names: str):
+        
+        if first_name == None:
+            first_name = ''
+        else:
+            first_name = first_name.split(' ')
+
+        if last_name == None:
+            last_name = ''
+        else:
+            last_name = last_name.split(' ')
+        
+        if middle_names == None:
+            middle_names = ''
+        else:
+            middle_names = middle_names.split(' ')
+
+        first_name = self.format_name(first_name)
+        last_name = self.format_name(last_name)
+        middle_names = self.format_name(middle_names)
+        complete_name = f"{first_name}{last_name}{middle_names}"
+
+        return complete_name
+
+    def format_name(self, list_name: list):
+        clean_name = ''
+        for name in list_name:
+            if name != '':
+                clean_name += f"{name} "
+        return clean_name
+
     def compare_workers(self, workers_peoplesoft: List[WorkerFormatComparison], workers_wsdl: List[WorkerFormatComparison], main: str):
         try:
             i = 0
             p = 0
+
+            personal_data = []
+
             if main == 'peoplesoft':
 
                 # Crea un diccionario con los atributos person_number de los objetos de workers_wsdl
                 wsdl_dic = {getattr(obj,"person_number"):obj for obj in workers_wsdl}
+
 
                 for wr_ps in workers_peoplesoft:
                     p += 1
@@ -57,14 +125,22 @@ class WorkerComparison:
                     # Si el valor de person_number se encuentra en el diccionario wsdl_dic
                     if person_number in wsdl_dic:
                         i += 1
+                        print('-----------------------------------')
                         print(f'{i} | {person_number}')
 
-                        #Comparamos los valores de la categoria Datos Personales
-                        self.compare_workers_personal_data(wr_ps, wsdl_dic[person_number])
+                        # Comparamos los valores de la categoria Datos Personales
+                        personal_data.append(self.compare_workers_personal_data(wr_ps, wsdl_dic[person_number]))
 
 
+                categories = {
+                    'personal_data': {
+                        "count": len(personal_data),
+                        "data": personal_data
+                    }
+                }
 
                 print('Total de usuarios Peoplesoft: ', p)
+                print('Total de usuarios Wsdl: ', len(workers_wsdl))
                 print('End for')
 
             # if main == 'wsdl':
@@ -75,36 +151,43 @@ class WorkerComparison:
             #             i += 1
             #             print(f'{i} | {person_number}')
 
-            return 'ok'
+            return categories
         except Exception as e:
             raise Exception(e) from e
 
     def compare_workers_personal_data(self, worker_peoplesoft: WorkerFormatComparison, worker_wsdl: WorkerFormatComparison):
-        return 'ok'
-
-    def format_workers_by_peoplesoft(self, workers: list):
         try:
-            new_workers = []
-            for worker in workers:
-                wr = WorkerFormatComparison(
-                    person_number=worker['emplid']
-                )
-                new_workers.append(wr)
+            name = self.compare_workers_personal_data_names(worker_peoplesoft.name, worker_wsdl.name)
 
-            return new_workers
+            personal_data = {
+                'person_number': worker_peoplesoft.person_number,
+                'name': name
+            }
+            return personal_data
+
         except Exception as e:
-            raise Exception(e) from e    
+            raise Exception(e) from e
 
-    def format_workers_by_wsdl(self, workers: list):
+
+    def compare_workers_personal_data_names(self, name_peoplesoft: str, name_wsdl: str):
         try:
-            new_workers = []
-            workers = workers['result']
-            for worker in workers:
-                wr = WorkerFormatComparison(
-                    person_number=worker['person_number']
-                )
-                new_workers.append(wr)
+            name_peoplesoft = name_peoplesoft.replace(' ', '').upper()
+            name_wsdl = name_wsdl.replace(' ', '').upper()
 
-            return new_workers
+            if name_peoplesoft == name_wsdl:
+                print('-----------------------------------')
+                print('Los nombres coinciden')
+                print('Peoplesoft: ', name_peoplesoft)
+                print('Wsdl      : ', name_wsdl)
+                print('-----------------------------------')
+                return True
+            else:
+                print('-----------------------------------')
+                print('Los nombres no coinciden')
+                print('Peoplesoft: ', name_peoplesoft)
+                print('Wsdl      : ', name_wsdl)
+                print('-----------------------------------')
+                return False
+
         except Exception as e:
-            raise Exception(e) from e    
+            raise Exception(e) from e

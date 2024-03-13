@@ -80,6 +80,12 @@ class WorkerComparison:
             raise Exception(e) from e
 
     def compare_workers_personal_data(self, worker_peoplesoft: WorkerFormatComparison, worker_wsdl: WorkerFormatComparison):
+        print('Comparando Datos Personales')
+        if worker_peoplesoft.person_number == worker_wsdl.person_number:
+            print('Los números de personas son iguales')
+        else:
+            print('Los números de personas son diferentes')
+
         return 'ok'
 
     def format_workers_by_peoplesoft(self, workers: list):

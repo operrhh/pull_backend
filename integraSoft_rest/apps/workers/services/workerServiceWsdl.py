@@ -133,6 +133,9 @@ class WorkerServiceWsdl:
                     # Sustituir los valores nulos en el campo Email por 'No tiene correo'
                     df_filtrado.loc[df_filtrado['email_emplid'].isnull(), 'email_emplid'] = 'No tiene correo'
 
+                    # Reemplazar los NaN por None
+                    df_filtrado = df_filtrado.where(pd.notna(df_filtrado), None)
+
                     # Crear una lista de diccionarios a partir del DataFrame
                     res = df_filtrado.to_dict(orient='records')
 

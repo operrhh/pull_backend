@@ -1,5 +1,23 @@
 from django.db import models
 
+# Clase que se encarga de comparar los trabajadores de peoplesoft con los trabajadores de wsdl
+class WorkerFormatComparison:
+
+    def __init__(self, person_number: str, name: str, email: str, address1: str, city: str):
+        self.person_number: str = self.format_person_number( person_number)
+        self.name: str = name
+        self.email: str = email
+        self.address1: str = address1
+        self.city: str = city
+
+    @staticmethod
+    def format_person_number(person_number: str):
+        if person_number:
+            person_number = person_number.strip()
+        return person_number
+
+
+
 class WorkerHcmNames(models.Model):
     legislation_code = models.CharField(max_length=10)
     last_name = models.CharField(max_length=20)

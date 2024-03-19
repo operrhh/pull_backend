@@ -4,7 +4,8 @@ from .api import (
     workers_peoplesoft_api_view,
     worker_peoplesoft_api_view,
     workers_wsdl_api_view,
-    workers_comparison_api_view
+    workers_comparison_api_view,
+    workers_comparison_excel_api_view
 )
 
 urlpatterns = [
@@ -12,5 +13,6 @@ urlpatterns = [
     path('peoplesoft/', workers_peoplesoft_api_view, name='workers_peoplesoft_api'),
     path('peoplesoft/<str:pk>/', worker_peoplesoft_api_view, name='worker_peoplesoft_api'),
     path('wsdl/', workers_wsdl_api_view, name='workers_wsdl_api'),
-    path('comparison/', workers_comparison_api_view, name='workers_comparison_api')
+    path('comparison/', workers_comparison_api_view, name='workers_comparison_api'),
+    path('comparison/excel/', workers_comparison_excel_api_view, name='workers_comparison_excel_api')
 ]

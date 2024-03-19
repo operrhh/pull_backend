@@ -16,7 +16,8 @@ from .serializers import WorkerHcmSerializer, WorkersHcmSerializer, WorkerPeople
 from ..services.workerServiceHcm import WorkerServiceHcm
 from ..services.workerServicePeopleSoft import WorkerServicePeopleSoft
 from ..services.workerServiceWsdl import WorkerServiceWsdl
-from ..services.worker_comparison import WorkerComparison
+from ..services.worker_service_comparison import WorkerServiceComparison
+from ..services.worker_service_comparison_excel import WorkerServiceComparisonExcel
 
 # region HCM
 @api_view(['GET', 'PUT', 'POST'])
@@ -119,10 +120,21 @@ def workers_wsdl_api_view(request):
 @permission_classes([IsAuthenticated])
 def workers_comparison_api_view(request):
     try:
-        worker_service = WorkerComparison()
+        worker_service = WorkerServiceComparison()
         if request.method == 'GET':
             workers = worker_service.get_workers_comparison(request)
             if workers:
                 return Response(workers, status = status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'message': str(e)})
+
+@api_view(['GET'])
+@authentication_classes([CustomTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def workers_comparison_excel_api_view(request):
+    try:
+        worker_service = WorkerServiceComparisonExcel()
+        if request.method == 'GET':
+            return worker_service.run(request=request)
     except Exception as e:
         return Response({'message': str(e)})

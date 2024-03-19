@@ -189,9 +189,17 @@ class WorkerServiceComparison:
                 personal_data = {
                     'person_number': worker_peoplesoft.person_number,
                     'name': name,
+                    'name_peoplesoft': worker_peoplesoft.name,
+                    'name_wsdl': worker_wsdl.name,
                     'email': email,
+                    'email_peoplesoft': worker_peoplesoft.email,
+                    'email_wsdl': worker_wsdl.email,
                     'address': address,
-                    'city': city
+                    'address_peoplesoft': worker_peoplesoft.address1,
+                    'address_wsdl': worker_wsdl.address1,
+                    'city': city,
+                    'city_peoplesoft': worker_peoplesoft.city,
+                    'city_wsdl': worker_wsdl.city
                 }
                 return personal_data
             else:
@@ -201,19 +209,9 @@ class WorkerServiceComparison:
             raise Exception(e) from e
 
     def compare_workers_personal_data_city(self, city_peoplesoft: str, city_wsdl: str):
-        try:        
-            # if city_peoplesoft != None:
-            #     city_peoplesoft = city_peoplesoft.replace(' ', '').upper()
-            #     if city_peoplesoft == '':
-            #         city_peoplesoft = None
-            # if city_wsdl != None:
-            #     city_wsdl = city_wsdl.replace(' ', '').upper()
-            #     if city_wsdl == '':
-            #         city_wsdl = None
-
-            # Limpiar y convertir las ciudades a mayúsculas
-            city_peoplesoft = city_peoplesoft.strip().upper() if city_peoplesoft is not None else None
-            city_wsdl = city_wsdl.strip().upper() if city_wsdl is not None else None
+        try:
+            city_peoplesoft = city_peoplesoft.strip().replace(' ', '').upper() if city_peoplesoft is not None else None
+            city_wsdl = city_wsdl.strip().replace(' ', '').upper() if city_wsdl is not None else None
 
             city_peoplesoft = None if city_peoplesoft == '' else city_peoplesoft
             city_wsdl = None if city_wsdl == '' else city_wsdl
@@ -233,21 +231,22 @@ class WorkerServiceComparison:
 
     def compare_workers_personal_data_address(self, address_peoplesoft: str, address_wsdl: str):
         try:
-            address_peoplesoft = address_peoplesoft.replace(' ', '').upper()
-            address_wsdl = address_wsdl.replace(' ', '').upper()
+            address_peoplesoft = address_peoplesoft.strip().replace(' ', '').upper() if address_peoplesoft is not None else None
+            address_wsdl = address_wsdl.strip().replace(' ', '').upper() if address_wsdl is not None else None
+
+            address_peoplesoft = None if address_peoplesoft == '' else address_peoplesoft
+            address_wsdl = None if address_wsdl == '' else address_wsdl
 
             if address_peoplesoft == address_wsdl:
                 print('Las direcciones coinciden')
-                print('Peoplesoft: ', address_peoplesoft)
-                print('Wsdl      : ', address_wsdl)
-                print('-----------------------------------')
-                return True
             else:
                 print('Las direcciones no coinciden')
-                print('Peoplesoft: ', address_peoplesoft)
-                print('Wsdl      : ', address_wsdl)
-                print('-----------------------------------')
-                return False
+
+            print('Peoplesoft: ', address_peoplesoft)
+            print('Wsdl      : ', address_wsdl)
+            print('-----------------------------------')
+
+            return address_peoplesoft == address_wsdl
         except Exception as e:
             raise Exception(e) from e
 

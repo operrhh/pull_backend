@@ -3,12 +3,26 @@ from django.db import models
 # Clase que se encarga de comparar los trabajadores de peoplesoft con los trabajadores de wsdl
 class WorkerFormatComparison:
 
-    def __init__(self, person_number: str, name: str, email: str, address1: str, city: str):
+    def __init__(self, 
+                person_number: str, 
+                name: str, 
+                email: str,
+                address1: str,
+                address2: str,
+                city: str,
+                location_code: str,
+                codigo_centro_costo: str,
+            ):
+        
         self.person_number: str = self.format_person_number( person_number)
         self.name: str = name
         self.email: str = email
         self.address1: str = address1
+        self.address2: str = address2
         self.city: str = city
+        self.location_code: str = location_code
+        self.ccu_codigo_centro_costo: str = codigo_centro_costo
+
 
     @staticmethod
     def format_person_number(person_number: str):

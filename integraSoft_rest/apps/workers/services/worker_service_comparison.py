@@ -33,7 +33,10 @@ class WorkerServiceComparison:
                     name = worker['name'],
                     email = worker['email'],
                     address1 = worker['address1'],
-                    city = worker['city']
+                    address2= worker['address2'],
+                    city = worker['city'],
+                    location_code = worker['location'],
+                    codigo_centro_costo = worker['deptid']
                 )
                 new_workers.append(wr)
 
@@ -54,8 +57,12 @@ class WorkerServiceComparison:
                     name = name_format,
                     email = worker['email_emplid'],
                     address1 = worker['address_line_1'],
-                    city = worker['town_or_city']
+                    address2 = worker['address_line_2'],
+                    city = worker['town_or_city'],
+                    location_code = worker['hdr_internal_location_code'],
+                    codigo_centro_costo = worker['ccu_codigo_centro_costo']
                 )
+
                 new_workers.append(wr)
 
             return new_workers
@@ -97,6 +104,7 @@ class WorkerServiceComparison:
         try:
             i = 0
             c = 0
+            a = 0
             res = {}
 
             list_personal_data = []
@@ -118,13 +126,21 @@ class WorkerServiceComparison:
                         i += 1
 
                         # Comparamos los valores de la categoria Datos Personales
-
                         res_personal_data = self.compare_workers_personal_data(wr_ps, wsdl_dic[person_number])
 
                         if res_personal_data != None:
                             list_personal_data.append(res_personal_data)
                         else:
                             c += 1
+
+                        # Comparamos los valores de la categoria Relación Laboral
+                        res_work_relationship = self.compare_workers_work_relationship(wr_ps, wsdl_dic[person_number])
+
+                        if res_work_relationship != None:
+                            list_work_relationship.append(res_work_relationship)
+                        else:
+                            a += 1
+
                     else:
                         not_found = {
                             'person_number': person_number
@@ -153,8 +169,11 @@ class WorkerServiceComparison:
                 print('Total de usuarios Wsdl: ', len(workers_wsdl))
                 print('Total de usuarios PeopleSoft encontrados en Cloud : ', i)
                 print('Total de usuarios PeopleSoft no encontrados en Cloud : ', len(list_worker_not_found))
-                print('Total de usuarios PeopleSoft encontrados en Cloud sin diferencias : ', c)
-                print('Total de usuarios PeopleSoft encontrados en Cloud con diferencias : ', len(list_personal_data))
+                print('Total de usuarios PeopleSoft encontrados en Cloud sin diferencias PERSONAL_DATA : ', c)
+                print('Total de usuarios PeopleSoft encontrados en Cloud sin diferencias WORK_RELATIONSHIP : ', a)
+                print('Total de usuarios PeopleSoft encontrados en Cloud con diferencias PERSONAL_DATA: ', len(list_personal_data))
+                print('Total de usuarios PeopleSoft encontrados en Cloud con diferencias WORK_RELATIONSHIP: ', len(list_work_relationship))
+
                 
                 
 
@@ -170,22 +189,26 @@ class WorkerServiceComparison:
         except Exception as e:
             raise Exception(e) from e
 
+
+    # Compara los datos personales de los trabajadores
+
     def compare_workers_personal_data(self, worker_peoplesoft: WorkerFormatComparison, worker_wsdl: WorkerFormatComparison):
         try:
-            print('')
-            print('===================================')
-            print(f'Person number : {worker_peoplesoft.person_number}')
-            print('===================================')
+            # print('')
+            # print('===================================')
+            # print(f'Person number : {worker_peoplesoft.person_number}')
+            # print('===================================')
 
             # if worker_peoplesoft.person_number == '16770555-3':
             #     print('')
             
             name = self.compare_workers_personal_data_names(worker_peoplesoft.name, worker_wsdl.name)
             email = self.compare_workers_personal_data_email(worker_peoplesoft.email, worker_wsdl.email)
-            address = self.compare_workers_personal_data_address(worker_peoplesoft.address1, worker_wsdl.address1)
+            address_1 = self.compare_workers_personal_data_address(worker_peoplesoft.address1, worker_wsdl.address1)
+            address_2 = self.compare_workers_personal_data_address(worker_peoplesoft.address2, worker_wsdl.address2)
             city = self.compare_workers_personal_data_city(worker_peoplesoft.city, worker_wsdl.city)
 
-            if name == False or email == False or address == False or city == False:
+            if name == False or email == False or address_1 == False or address_2 == False or city == False:
                 personal_data = {
                     'person_number': worker_peoplesoft.person_number,
                     'name': name,
@@ -194,12 +217,15 @@ class WorkerServiceComparison:
                     'email': email,
                     'email_peoplesoft': worker_peoplesoft.email,
                     'email_wsdl': worker_wsdl.email,
-                    'address': address,
-                    'address_peoplesoft': worker_peoplesoft.address1,
-                    'address_wsdl': worker_wsdl.address1,
+                    'address_1': address_1,
+                    'address_1_peoplesoft': worker_peoplesoft.address1,
+                    'address_1_wsdl': worker_wsdl.address1,
+                    'address_2': address_2,
+                    'address_2_peoplesoft': worker_peoplesoft.address2,
+                    'address_2_wsdl': worker_wsdl.address2,
                     'city': city,
                     'city_peoplesoft': worker_peoplesoft.city,
-                    'city_wsdl': worker_wsdl.city
+                    'city_wsdl': worker_wsdl.city,
                 }
                 return personal_data
             else:
@@ -216,14 +242,14 @@ class WorkerServiceComparison:
             city_peoplesoft = None if city_peoplesoft == '' else city_peoplesoft
             city_wsdl = None if city_wsdl == '' else city_wsdl
 
-            if city_peoplesoft == city_wsdl :
-                print('Las ciudades coinciden')
-            else:
-                print('Las ciudades no coinciden')
+            # if city_peoplesoft == city_wsdl :
+            #     print('Las ciudades coinciden')
+            # else:
+            #     print('Las ciudades no coinciden')
 
-            print('Peoplesoft: ', city_peoplesoft)
-            print('Wsdl      : ', city_wsdl)
-            print('-----------------------------------')
+            # print('Peoplesoft: ', city_peoplesoft)
+            # print('Wsdl      : ', city_wsdl)
+            # print('-----------------------------------')
 
             return city_peoplesoft == city_wsdl
         except Exception as e:
@@ -237,14 +263,14 @@ class WorkerServiceComparison:
             address_peoplesoft = None if address_peoplesoft == '' else address_peoplesoft
             address_wsdl = None if address_wsdl == '' else address_wsdl
 
-            if address_peoplesoft == address_wsdl:
-                print('Las direcciones coinciden')
-            else:
-                print('Las direcciones no coinciden')
+            # if address_peoplesoft == address_wsdl:
+            #     print('Las direcciones coinciden')
+            # else:
+            #     print('Las direcciones no coinciden')
 
-            print('Peoplesoft: ', address_peoplesoft)
-            print('Wsdl      : ', address_wsdl)
-            print('-----------------------------------')
+            # print('Peoplesoft: ', address_peoplesoft)
+            # print('Wsdl      : ', address_wsdl)
+            # print('-----------------------------------')
 
             return address_peoplesoft == address_wsdl
         except Exception as e:
@@ -252,18 +278,16 @@ class WorkerServiceComparison:
 
     def compare_workers_personal_data_email(self, email_peoplesoft: str, email_wsdl: str):
         try:
-            if email_peoplesoft == email_wsdl:
-                print('Los email coinciden')
-                print('Peoplesoft: ', email_peoplesoft)
-                print('Wsdl      : ', email_wsdl)
-                print('-----------------------------------')
-                return True
-            else:
-                print('Los email no coinciden')
-                print('Peoplesoft: ', email_peoplesoft)
-                print('Wsdl      : ', email_wsdl)
-                print('-----------------------------------')
-                return False
+            # if email_peoplesoft == email_wsdl:
+            #     print('Los correos coinciden')
+            # else:
+            #     print('Los correos no coinciden')
+            
+            # print('Peoplesoft: ', email_peoplesoft)
+            # print('Wsdl      : ', email_wsdl)
+            # print('-----------------------------------')
+
+            return email_peoplesoft == email_wsdl
 
         except Exception as e:
             raise Exception(e) from e
@@ -273,18 +297,100 @@ class WorkerServiceComparison:
             name_peoplesoft = name_peoplesoft.replace(' ', '').upper()
             name_wsdl = name_wsdl.replace(' ', '').upper()
 
-            if name_peoplesoft == name_wsdl:
-                print('Los nombres coinciden')
-                print('Peoplesoft: ', name_peoplesoft)
-                print('Wsdl      : ', name_wsdl)
-                print('-----------------------------------')
-                return True
+            # if name_peoplesoft == name_wsdl:
+            #     print('Los nombres coinciden')
+            # else:
+            #     print('Los nombres no coinciden')
+
+            
+            # print('Peoplesoft: ', name_peoplesoft)
+            # print('Wsdl      : ', name_wsdl)
+            # print('-----------------------------------')
+
+            return name_peoplesoft == name_wsdl
+
+        except Exception as e:
+            raise Exception(e) from e
+
+
+    # Compara la relacion laboral de los trabajadores
+
+    def compare_workers_work_relationship(self, worker_peoplesoft: WorkerFormatComparison, worker_wsdl: WorkerFormatComparison):
+        try:
+            location_code = self.compare_workers_work_relationship_location_code(worker_peoplesoft.location_code, worker_wsdl.location_code)
+            codigo_centro_costo = self.compare_workers_work_relationship_codigo_centro_costo(worker_peoplesoft.ccu_codigo_centro_costo, worker_wsdl.ccu_codigo_centro_costo)
+
+            if location_code == False or codigo_centro_costo == False:
+                work_relationship = {
+                    'person_number': worker_peoplesoft.person_number,
+                    'location_code': location_code,
+                    'location_code_peoplesoft': worker_peoplesoft.location_code,
+                    'location_code_wsdl': worker_wsdl.location_code,
+                    'codigo_centro_costo': codigo_centro_costo,
+                    'codigo_centro_costo_peoplesoft': worker_peoplesoft.ccu_codigo_centro_costo,
+                    'codigo_centro_costo_wsdl': worker_wsdl.ccu_codigo_centro_costo,
+                }
+                return work_relationship
             else:
-                print('Los nombres no coinciden')
-                print('Peoplesoft: ', name_peoplesoft)
-                print('Wsdl      : ', name_wsdl)
-                print('-----------------------------------')
-                return False
+                return None
+        except Exception as e:
+            raise Exception(e) from e
+
+    def compare_workers_work_relationship_location_code(self, location_code_peoplesoft: str, location_code_wsdl: str):
+        try:
+            location_code_peoplesoft = location_code_peoplesoft.strip().replace(' ', '').upper() if location_code_peoplesoft is not None else None
+            location_code_wsdl = location_code_wsdl.strip().replace(' ', '').upper() if location_code_wsdl is not None else None
+
+            location_code_peoplesoft = None if location_code_peoplesoft == '' else location_code_peoplesoft
+            location_code_wsdl = None if location_code_wsdl == '' else location_code_wsdl
+
+            # if location_code_peoplesoft == location_code_wsdl:
+            #     print('Los codigos de localizacion coinciden')
+            # else:
+            #     print('Los codigos de localizacion no coinciden')
+
+            # print('Peoplesoft: ', location_code_peoplesoft)
+            # print('Wsdl      : ', location_code_wsdl)
+            # print('-----------------------------------')
+
+            return location_code_peoplesoft == location_code_wsdl
+        except Exception as e:
+            raise Exception(e) from e
+
+    def compare_workers_work_relationship_codigo_centro_costo(self, codigo_centro_costo_peoplesoft: str, codigo_centro_costo_wsdl: str):
+        try:
+            codigo_centro_costo_peoplesoft = codigo_centro_costo_peoplesoft.strip().replace(' ', '').upper() if codigo_centro_costo_peoplesoft is not None else None
+            codigo_centro_costo_wsdl = codigo_centro_costo_wsdl.strip().replace(' ', '').upper() if codigo_centro_costo_wsdl is not None else None
+
+            codigo_centro_costo_peoplesoft = None if codigo_centro_costo_peoplesoft == '' else codigo_centro_costo_peoplesoft
+            codigo_centro_costo_wsdl = None if codigo_centro_costo_wsdl == '' else codigo_centro_costo_wsdl
+
+            if codigo_centro_costo_peoplesoft == codigo_centro_costo_wsdl:
+                print(f'Los codigos de centro de costo coinciden: {codigo_centro_costo_peoplesoft} | {codigo_centro_costo_wsdl}')
+            # else:
+            #     print('Los codigos de centro de costo no coinciden')
+
+            # print('Peoplesoft: ', codigo_centro_costo_peoplesoft)
+            # print('Wsdl      : ', codigo_centro_costo_wsdl)
+            # print('-----------------------------------')
+            
+
+
+            return codigo_centro_costo_peoplesoft == codigo_centro_costo_wsdl
+        except Exception as e:
+            raise Exception(e) from e
+
+    def exist_worker(self, workers_ps, workers_wsdl):
+        try:
+            ps = '18558627-8'
+
+            for worker_ps in workers_ps:
+                if worker_ps.person_number == ps:
+                    print('Exist in peoplesoft')
+            
+            for worker_wsdl in workers_wsdl:
+                if worker_wsdl.person_number == ps:
+                    print('Exist in wsdl')
 
         except Exception as e:
             raise Exception(e) from e

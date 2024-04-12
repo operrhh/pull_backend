@@ -30,6 +30,7 @@ class WorkerServiceWsdl:
             'JOB_NAME':'job_name',
             'LEGAL_ENTITY_NAME':'legal_entity_name',
             'HDR_PERSON_LOCATION':'hdr_person_location',
+            'HDR_INTERNAL_LOCATION_CODE':'hdr_internal_location_code',
             'HDR_PERSON_DEPARTMENT':'hdr_person_department',
             'ID_JEFE':'id_jefe',
             'NOMBRE_JEFE':'nombre_jefe',
@@ -44,6 +45,9 @@ class WorkerServiceWsdl:
             'FIRST_NAME':'first_name',
             'LAST_NAME':'last_name',
             'MIDDLE_NAMES':'middle_names',
+            # 'FLEX_CONTEXT_DEPARTMENT':'flex_context_department',
+            'CCU_CODIGO_CENTRO_COSTO':'ccu_codigo_centro_costo',
+            # 'CCU_TIPO_CENTRO_COSTO':'ccu_tipo_centro_costo',
         }
 
         payload = {
@@ -61,8 +65,8 @@ class WorkerServiceWsdl:
                             'values': {
                                 'item': [
                                     '00 - Compañía Cervecerías Unidas S.A.',
-                                    '07 - La Barra S.A.',
-                                    '11 - Compañía Industrial Cervecera S.A.',
+                                    # '07 - La Barra S.A.',
+                                    # '11 - Compañía Industrial Cervecera S.A.',
                                     # '16 - Saenz Briones y CIA S.A.I.C.',
                                     # '22- Bebidas Bolivianas BBO S.A.',
                                     # '23 - Cervecera CCU Chile Ltda.',
@@ -122,13 +126,13 @@ class WorkerServiceWsdl:
                     # Leer el archivo Excel directamente desde los datos binarios
                     df = pd.read_excel(io.BytesIO(result["reportBytes"]), header=1)
 
-                    print("Excel leído correctamente")
-
                     # Renombrar las columnas
                     df = df.rename(columns=nuevos_nombres)
-
+                    
+                    
                     # Filtrar los registros que no tienen el campo Puesto
                     df_filtrado = df[df['job_name'].notnull()]
+
 
                     # Sustituir los valores nulos en el campo Email por 'No tiene correo'
                     df_filtrado.loc[df_filtrado['email_emplid'].isnull(), 'email_emplid'] = 'No tiene correo'

@@ -6,5 +6,5 @@ from .api import (
 
 urlpatterns = [
     path('hcm/', departments_hcm_api_view, name = 'departments_hcm_api'),
-    path('peoplesoft/', departments_peoplesoft_api_view, name = 'departments_peoplesoft_api')
+    path('peoplesoft/', departments_peoplesoft_api_view, name = 'departments_peoplesoft_api'),
 ]

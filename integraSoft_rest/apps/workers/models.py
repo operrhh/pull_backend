@@ -1,4 +1,5 @@
 from django.db import models
+import math
 
 # Clase que se encarga de comparar los trabajadores de peoplesoft con los trabajadores de wsdl
 class WorkerFormatComparison:
@@ -10,25 +11,35 @@ class WorkerFormatComparison:
                 address1: str,
                 address2: str,
                 city: str,
+                phone: str,
                 location_code: str,
                 codigo_centro_costo: str,
+                job_name: str,
+                job_code: str,
+                manager_id: str,
             ):
-        
-        self.person_number: str = self.format_person_number( person_number)
-        self.name: str = name
-        self.email: str = email
-        self.address1: str = address1
-        self.address2: str = address2
-        self.city: str = city
-        self.location_code: str = location_code
-        self.ccu_codigo_centro_costo: str = codigo_centro_costo
 
+        self.person_number: str = self.convert_to_none_if_empty(self.format_person_number( person_number))
+        self.name: str = self.convert_to_none_if_empty(name)
+        self.email: str = self.convert_to_none_if_empty(email)
+        self.address1: str = self.convert_to_none_if_empty(address1)
+        self.address2: str = self.convert_to_none_if_empty(address2)
+        self.city: str = self.convert_to_none_if_empty(city)
+        self.phone: str = self.convert_to_none_if_empty(phone)
+        self.location_code: str = self.convert_to_none_if_empty(location_code)
+        self.ccu_codigo_centro_costo: str = self.convert_to_none_if_empty(codigo_centro_costo)
+        self.job_name: str = self.convert_to_none_if_empty(job_name)
+        self.job_code: str = self.convert_to_none_if_empty(job_code)
+        self.manager_id: str = self.convert_to_none_if_empty(manager_id)
 
     @staticmethod
     def format_person_number(person_number: str):
-        if person_number:
-            person_number = person_number.strip()
-        return person_number
+        return person_number.strip() if person_number else None
+
+    @staticmethod
+    def convert_to_none_if_empty(value: str):
+        return None if value in {None, '', 'NaN'} or (isinstance(value, float) and math.isnan(value)) else value
+        
 
 
 

@@ -4,9 +4,13 @@ import base64
 
 def test_db_connection():
     # Configuración de la conexión basada en tu información
-    dsn_str = cx_Oracle.makedsn("localhost", 1522, service_name="xe")
-    user = "integrasoft"
-    password = "integrasoft123"
+    dsn_str = cx_Oracle.makedsn("10.85.6.154", 1521, service_name="PDBPRD.ccuhcmproddbsub.ccuhcmprodvcn.oraclevcn.com")
+    user = "CMARTINU"
+    password = "cM3Aap3NU_2024!"
+
+    # dsn_str = cx_Oracle.makedsn("localhost", 1522, service_name="xe")
+    # user = "integrasoft"
+    # password = "integrasoft123"    
 
     # Intento de conexión
     try:

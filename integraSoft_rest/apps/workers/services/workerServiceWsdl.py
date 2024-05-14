@@ -8,7 +8,8 @@ import io
 class WorkerServiceWsdl:
     def __init__(self):
         # URL del archivo WSDL
-        self.wsdl_url = 'https://hcoa-test.fa.us2.oraclecloud.com:443/xmlpserver/services/ExternalReportWSSService?WSDL'
+        # self.wsdl_url = 'https://hcoa-test.fa.us2.oraclecloud.com:443/xmlpserver/services/ExternalReportWSSService?WSDL'
+        self.wsdl_url = 'https://hcoa.fa.us2.oraclecloud.com:443/xmlpserver/services/ExternalReportWSSService?WSDL'
 
     def get_workers_wsdl(self):
         workers = self.run_report()
@@ -27,6 +28,7 @@ class WorkerServiceWsdl:
             'START_DATE':'start_date',
             'DISPLAY_NAME':'display_name',
             'EMAIL_EMPLID':'email_emplid',
+            'JOB_CODE':'job_code',
             'JOB_NAME':'job_name',
             'LEGAL_ENTITY_NAME':'legal_entity_name',
             'HDR_PERSON_LOCATION':'hdr_person_location',
@@ -64,6 +66,7 @@ class WorkerServiceWsdl:
                             'useNullForAll': '?',
                             'values': {
                                 'item': [
+                                            # 40 50 60 61 63 71 80 81 83 90 96
                                     '00 - Compañía Cervecerías Unidas S.A.',
                                     # '07 - La Barra S.A.',
                                     # '11 - Compañía Industrial Cervecera S.A.',
@@ -106,7 +109,10 @@ class WorkerServiceWsdl:
                         }
                     ]
                 },
-                'reportAbsolutePath': '/~MCASTROFOX/IntegraSoftTest/Informacion Empleados.xdo',
+                # 'reportAbsolutePath': '/~MCASTROFOX/IntegraSoftTest/Informacion Empleados.xdo',
+                # 'reportAbsolutePath': '/~OPERRHH@CCU.CL/IntegraSoftTest/Informacion Empleados.xdo',
+                'reportAbsolutePath': '/~operrhh@ccu.cl/IntegraSoftTest/Informacion Empleados.xdo',
+                    
                 'sizeOfDataChunkDownload': -1,
                 'byPassCache': False,
                 'flattenXML': False,
@@ -117,25 +123,25 @@ class WorkerServiceWsdl:
         try:
             # Crea un cliente SOAP dentro de un administrador de contexto
             with Session() as session:
-                session.auth = HTTPBasicAuth('mcastrofox', 'Feb.2023')
+                session.auth = HTTPBasicAuth('operrhh@ccu.cl', 'Op$r22.8')
+                print("Cliente creado correctamente")
                 transport = Transport(session=session)
                 with Client(wsdl=self.wsdl_url, transport=transport) as client:
                     service = client.bind('ExternalReportWSSService', 'ExternalReportWSSService')
                     result = service.runReport(reportRequest=payload['reportRequest'], appParams=payload['appParams'])
                     print("Reporte ejecutado correctamente")
+                    
                     # Leer el archivo Excel directamente desde los datos binarios
                     df = pd.read_excel(io.BytesIO(result["reportBytes"]), header=1)
 
                     # Renombrar las columnas
                     df = df.rename(columns=nuevos_nombres)
-                    
-                    
+
                     # Filtrar los registros que no tienen el campo Puesto
                     df_filtrado = df[df['job_name'].notnull()]
 
-
                     # Sustituir los valores nulos en el campo Email por 'No tiene correo'
-                    df_filtrado.loc[df_filtrado['email_emplid'].isnull(), 'email_emplid'] = 'No tiene correo'
+                    df_filtrado.loc[df_filtrado['email_emplid'].isnull(), 'email_emplid'] = 'NA'
 
                     # Reemplazar los NaN por None
                     df_filtrado = df_filtrado.where(pd.notna(df_filtrado), None)

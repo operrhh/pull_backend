@@ -12,9 +12,9 @@ class WorkerServicePeopleSoft:
         self.field_names = [
             'emplid', 'birthdate', 'birthplace', 'country_nm_format', 'name', 'name_prefix', 'last_name', 'first_name',
             'middle_name', 'second_last_name', 'country', 'address1', 'address2', 'address3', 'address4', 'city',
-            'county', 'state', 'email', 'email_type', 'home_phone', 'national_id_type', 'national_id', 'sex', 'mar_status', 'highest_educ_lvl',
-            'orig_hire_dt', 'per_org', 'cmpny_seniority_dt', 'service_dt', 'last_increase_dt', 'business_title',
-            'effdt', 'hire_dt', 'supervisor_id', 'business_unit', 'business_unit_descr', 'deptid','dept_descr', 'jobcode', 'action',
+            'county', 'state', 'email', 'email_type', 'home_phone','phone', 'national_id_type', 'national_id', 'sex', 'mar_status', 'highest_educ_lvl',
+            'orig_hire_dt', 'per_org', 'cmpny_seniority_dt', 'service_dt', 'last_increase_dt','effdt', 'hire_dt', 'supervisor_id',
+            'business_unit', 'business_unit_descr', 'deptid','dept_descr', 'jobcode', 'job_descr', 'action',
             'action_dt', 'action_reason', 'location', 'job_entry_dt', 'dept_entry_dt', 'reg_temp', 'full_part_time',
             'company', 'paygroup', 'empl_type', 'holiday_schedule', 'std_hours', 'reg_region', 'jobtitle', 'jobtitle_abbrv',
             'deptname', 'deptname_abbrv', 'rehire_dt', 'work_phone', 'nid_country', 'annual_rt', 'monthly_rt', 'daily_rt',
@@ -29,6 +29,10 @@ class WorkerServicePeopleSoft:
         department = request.query_params.get('department', None)
 
         try:
+            
+            database = connections['people_soft'].settings_dict['NAME']
+            #print('Base de datos: ' + database)
+
             with connections['people_soft'].cursor() as cursor:
                 out_cur = cursor.connection.cursor()
 

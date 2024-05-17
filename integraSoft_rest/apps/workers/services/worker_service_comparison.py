@@ -64,7 +64,7 @@ class WorkerServiceComparison:
                     address1 = str(worker['address_line_1']),
                     address2 = str(worker['address_line_2']),
                     city = str(worker['town_or_city']),
-                    phone= str(worker['work_phone']),
+                    phone= ' ',
                     location_code = str(worker['hdr_internal_location_code']),
                     codigo_centro_costo = str(codigo_centro_costo_format),
                     job_name= str(worker['job_name']),

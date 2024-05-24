@@ -75,10 +75,10 @@ class WorkerServiceWsdl:
                                     # '23 - Cervecera CCU Chile Ltda.', NOOOO
                                     # '25 - CCU Uruguay S.A.', NOOOO
                                     # '31 - Fábrica de Envases Plásticos S.A.', # LISTO (3 registros NOT FOUND)
-                                    '32 - Transportes CCU Ltda.',
+                                    # '32 - Transportes CCU Ltda.',
                                     # '35 - Bebidas del Paraguay SA', NOOOO
                                     # '36 - Distribuidora del Paraguay SA', NOOOO
-                                    # '40 - Financiera CRECCU S.A.',
+                                    '40 - Financiera CRECCU S.A.',
                                     # '45 - Vitivinícola del Maipo S.A.', NOOOO
                                     # '46 - Viña del Mar de Casablanca S.A.', NOOOO
                                     # '47 - Viña Misiones de Rengo S.A.', NOOOO

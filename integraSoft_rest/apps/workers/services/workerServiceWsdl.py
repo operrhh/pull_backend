@@ -67,43 +67,43 @@ class WorkerServiceWsdl:
                             'values': {
                                 'item': [
                                             # 40 50 60 61 63 71 80 81 83 90 96
-                                    '00 - Compañía Cervecerías Unidas S.A.',
-                                    # '07 - La Barra S.A.',
-                                    # '11 - Compañía Industrial Cervecera S.A.',
-                                    # '16 - Saenz Briones y CIA S.A.I.C.',
-                                    # '22- Bebidas Bolivianas BBO S.A.',
-                                    # '23 - Cervecera CCU Chile Ltda.',
-                                    # '25 - CCU Uruguay S.A.',
-                                    # '31 - Fábrica de Envases Plásticos S.A.',
-                                    # '32 - Transportes CCU Ltda.',
-                                    # '35 - Bebidas del Paraguay SA',
-                                    # '36 - Distribuidora del Paraguay SA',
+                                    # '00 - Compañía Cervecerías Unidas S.A.', LISTO
+                                    # '07 - La Barra S.A.', LISTO
+                                    # '11 - Compañía Industrial Cervecera S.A.', NOOOO
+                                    # '16 - Saenz Briones y CIA S.A.I.C.', NOOOO
+                                    # '22- Bebidas Bolivianas BBO S.A.', NOOOO
+                                    # '23 - Cervecera CCU Chile Ltda.', NOOOO
+                                    # '25 - CCU Uruguay S.A.', NOOOO
+                                    # '31 - Fábrica de Envases Plásticos S.A.', # LISTO (3 registros NOT FOUND)
+                                    '32 - Transportes CCU Ltda.',
+                                    # '35 - Bebidas del Paraguay SA', NOOOO
+                                    # '36 - Distribuidora del Paraguay SA', NOOOO
                                     # '40 - Financiera CRECCU S.A.',
-                                    # '45 - Vitivinícola del Maipo S.A.',
-                                    # '46 - Viña del Mar de Casablanca S.A.',
-                                    # '47 - Viña Misiones de Rengo S.A.',
-                                    # '48 - Viñas Orgánicas VSPT S.A.',
+                                    # '45 - Vitivinícola del Maipo S.A.', NOOOO
+                                    # '46 - Viña del Mar de Casablanca S.A.', NOOOO
+                                    # '47 - Viña Misiones de Rengo S.A.', NOOOO
+                                    # '48 - Viñas Orgánicas VSPT S.A.', NOOOO
                                     # '50 - Viña San Pedro Tarapacá S.A.',
                                     # '51 - Viña Santa Helena S.A.',
-                                    # '52 - Finca La Celia S.A.',
-                                    # '53 - Viña Altair S.A.',
-                                    # '56 - Viña Valles de Chile S.A.',
-                                    # '58 - Viña Altair II S.A.',
-                                    # '59 - Viña Tabalí S.A.',
+                                    # '52 - Finca La Celia S.A.', NOOOO
+                                    # '53 - Viña Altair S.A.', NOOOO
+                                    # '56 - Viña Valles de Chile S.A.', NOOOO
+                                    # '58 - Viña Altair II S.A.', NOOOO
+                                    # '59 - Viña Tabalí S.A.', NOOOO
                                     # '60 - Cervecera Austral S.A.',
                                     # '61 - Comercial Patagona Ltda.',
                                     # '63 - Compañía Cervecera Kunstmann S.A.',
-                                    # '70 - Pisconor S.A.',
+                                    # '70 - Pisconor S.A.', NOOOO
                                     # '71 - Compañía Pisquera de Chile S.A.',
                                     # '80 - Aguas CCU-Nestle Chile S.A',
                                     # '81 - Manantial S.A.',
                                     # '83 - Bebidas Ecusa SPA',
                                     # '90 - Embotelladoras Chilenas Unidas S.A.',
-                                    # '92 - Transportes ECUSA S.A.',
-                                    # '93 - Vending y Servicios CCU Ltda.',
+                                    # '92 - Transportes ECUSA S.A.', NOOOO
+                                    # '93 - Vending y Servicios CCU Ltda.', NOOOO
                                     # '96 - Comercial CCU S.A.',
-                                    # '97 - Foods Cia de Alimentos CCU S.A.',
-                                    # '99 - Promarca S.A.'
+                                    # '97 - Foods Cia de Alimentos CCU S.A.', NOOOO
+                                    # '99 - Promarca S.A.' NOOOO
                                 ]
                             }
                         }

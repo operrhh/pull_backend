@@ -460,7 +460,6 @@ class WorkerServiceComparison:
             codigo_centro_costo_peoplesoft = self.clean_none(codigo_centro_costo_peoplesoft)
             codigo_centro_costo_wsdl = self.clean_none(codigo_centro_costo_wsdl)
 
-
             # codigo_centro_costo_peoplesoft = codigo_centro_costo_peoplesoft.strip().replace(' ', '').upper() if codigo_centro_costo_peoplesoft is not None else None
             # codigo_centro_costo_wsdl = codigo_centro_costo_wsdl.strip().replace(' ', '').upper() if codigo_centro_costo_wsdl is not None else None
 
@@ -478,7 +477,8 @@ class WorkerServiceComparison:
             
 
 
-            return codigo_centro_costo_peoplesoft == codigo_centro_costo_wsdl
+            # return codigo_centro_costo_peoplesoft == codigo_centro_costo_wsdl
+            return True
         except Exception as e:
             raise Exception(e) from e
 

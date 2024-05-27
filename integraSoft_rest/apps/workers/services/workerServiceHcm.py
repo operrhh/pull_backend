@@ -2,6 +2,9 @@ from ...services.globalService import GlobalService
 from ..custom_exceptions import ExceptionWorkerHcm
 from apps.parameters.models import Parameter, ParameterType
 from ...utils import log_entry
+from .workerServicePeopleSoft import WorkerServicePeopleSoft
+from ..api.serializers import WorkerPeopleSoftSerializer
+
 
 class WorkerServiceHcm:
     def __init__(self):
@@ -34,7 +37,7 @@ class WorkerServiceHcm:
         }
 
         self.global_service = GlobalService()
-
+        self.peoplesoft_service = WorkerServicePeopleSoft()
 
         # Parametros que vienen en la request
         self.department_id_param_integrasoft: int = 0
@@ -381,3 +384,129 @@ class WorkerServiceHcm:
 
         log_entry(request.user, 'INFO', 'get workers hcm (params definition)', f'Parametros de la consulta: {params}')
         return params
+
+
+
+
+
+# POST Worker HCM
+
+    def create_worker_hcm(self, request):
+        try:
+            person_number = request.query_params.get('personNumber', None)
+
+            if person_number:
+                res = self.get_worker_hcm(request)
+                if res:
+                    raise ExceptionWorkerHcm('El worker ya existe')
+                else:
+                    worker = self.peoplesoft_service.get_workers_peoplesoft(request)
+                    if worker:
+                        worker_serializer = WorkerPeopleSoftSerializer(worker)
+                        res = self.create_worker_hcm_data(worker_serializer.data)
+            else:
+                raise ExceptionWorkerHcm('El parametro personNumber es requerido')
+
+        except Exception as e:
+            raise Exception(e) from e
+    
+    def create_worker_hcm_data(self, worker):
+        try:
+            body_data = {
+                "PersonNumber": worker.get('emplid'),
+                "DateOfBirth": worker.get('birthdate'),
+                "CountryOfBirth": "CL",
+                "legislativeInfo":[
+                    {
+                        "LegislationCode": "CL",
+                        "Gender": worker.get('sex'),
+                        "MaritalStatus": worker.get('mar_status'),
+                        "HighestEducationLevel": worker.get('highest_educ_lvl'),
+                    }
+                ],
+                "names":[
+                    {
+                        "LegislationCode": "CL",
+                        "FirstName": worker.get('first_name'),
+                        "LastName": worker.get('last_name'),
+                        "PreviousLastName": worker.get('previous_last_name'),
+                    }
+                ],
+                "addresses":[
+                    {
+                        "AddressType":"HOME",
+                        "AddressLine1": worker.get('address1'),
+                        "AddressLine2": worker.get('address2'),
+                        "AddressLine3": worker.get('address3'),
+                        "AddressLine4": worker.get('address4'),
+                        "TownOrCity": worker.get('city'),
+                        "Region1":"",
+                        "Region2":"",
+                        "Country":"CL",
+                        "PostalCode":""
+                    }
+                ],
+                "emails":[
+                    {
+                        "EmailType":"H1",
+                        "EmailAddress": worker.get('email'),
+                        "FromDate":"",
+                        "PrimaryFlag": True
+                    }
+                ],
+                "phones":[
+                    {
+                        "PhoneType":"HM",
+                        "PhoneNumber": worker.get('phone'),
+                        "FromDate":"",
+                        "PrimaryFlag": True
+                    }
+                ],
+                "nationalIdentifiers":[
+                    {
+                        "LegislationCode":"CL",
+                        "NationalIdentifierType":"NID",
+                        "NationalIdentifierNumber": worker.get('emplid'),
+                        "PrimaryFlag":True
+                    }
+                ],
+                "workRelationships":[
+                    {
+                        "LegalEmployerName":worker.get('company_descr'),
+                        "WorkerType":"E",
+                        "StartDate":worker.get('effdt'),
+                        "EnterpriseSeniorityDate":worker.get('effdt'),
+                        "LegalEmployerSeniorityDate":worker.get('effdt'),
+                        "PrimaryFlag": True,
+                        "assignments":[
+                            {
+                                "BusinessUnitName": f"{worker.get('company_code')} - {worker.get('company_descr')} BU",
+                                "ActionCode":"HIRE",
+                                "ReasonCode":"2_HIR",
+                                "JobCode":worker.get('jobcode'),
+                                "DepartmentName": f"{worker.get('deptid')} - {worker.get('dept_descr')}",
+                                "LocationCode":worker.get('location'),
+                                "AssignmentCategory":"FR",
+                                "PermanentTemporary":"R",
+                                "FullPartTime":"FULL_TIME",
+                                "ManagerFlag":False,
+                                "NormalHours":180,
+                                "Frequency":"M",
+                                "WorkerCategory":worker.get('job_family'),
+                                "CollectiveAgreementName": worker.get('labor_agreement'),
+                                "UnionName":f"{worker.get('union_code')} - {worker.get('union_descr')}",
+                                "LabourUnionMemberFlag":True,
+                            }
+                        ]
+                    }
+                ]
+            }
+
+
+            response = self.global_service.generate_request(request=self.request, url=self.dic_url.get('worker'), body_data=body_data, method='POST')
+            if response:
+                return response
+            else:
+                raise ExceptionWorkerHcm('Error al crear worker')            
+        except Exception as e:
+            raise Exception(e) from e

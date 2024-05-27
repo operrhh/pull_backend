@@ -98,7 +98,6 @@ def worker_peoplesoft_api_view(request,pk):
             return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
 # endregion
 
-
 # region WSDL
 @api_view(['GET'])
 def workers_wsdl_api_view(request):
@@ -138,3 +137,5 @@ def workers_comparison_excel_api_view(request):
             return worker_service.run(request=request)
     except Exception as e:
         return Response({'message': str(e)})
+
+# endregion

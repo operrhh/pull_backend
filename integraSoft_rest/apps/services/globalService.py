@@ -5,6 +5,7 @@ import base64
 import cx_Oracle
 from ..parameters.models import Parameter, ParameterType
 from ..utils import log_entry
+from datetime import datetime
 
 class GlobalService:
     def __init__(self):
@@ -18,7 +19,7 @@ class GlobalService:
                                                                                                 .filter(FilterField1='authorization')
                                                                                                 .filter(FilterField2='people_soft')}
 
-    def generate_request(self, request, url, params={}, body_data={}):
+    def generate_request(self, request, url, params={}, body_data={}, method=''):
         credentials = f"{self.dic_authorization.get('user')}:{self.dic_authorization.get('pass')}"
         encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
         
@@ -28,16 +29,34 @@ class GlobalService:
             "REST-Framework-Version": "4",
         }
         if body_data:
-            headers['Effective-of'] = "RangeMode=UPDATE;RangeStartDate=2023-08-04;RangeEndDate=2024-09-01"
-            try:
-                response = requests.patch(url, headers=headers, json=body_data)
 
-                if response.status_code == 200:
-                    return response.json()
-                else:
-                    response.raise_for_status()
-            except requests.exceptions.RequestException as e:
-                raise Exception(response.text) from e
+            if method == 'POST':
+                #Obtenemos fecha actual
+                now = datetime.now()
+                date_time = now.strftime("%Y-%m-%d")
+
+                headers['Effective-of'] = f"RangeStartDate={date_time};"
+                try:
+                    response = requests.post(url, headers=headers, json=body_data)
+
+                    if response.status_code == 200:
+                        return response.json()
+                    else:
+                        response.raise_for_status()
+                except requests.exceptions.RequestException as e:
+                    raise Exception(response.text) from e
+                
+            if method == 'PATCH':
+                headers['Effective-of'] = "RangeMode=UPDATE;RangeStartDate=2023-08-04;RangeEndDate=2024-09-01"
+                try:
+                    response = requests.patch(url, headers=headers, json=body_data)
+
+                    if response.status_code == 200:
+                        return response.json()
+                    else:
+                        response.raise_for_status()
+                except requests.exceptions.RequestException as e:
+                    raise Exception(response.text) from e
         else:
             try:
                 response = requests.get(url, headers=headers, params=params)

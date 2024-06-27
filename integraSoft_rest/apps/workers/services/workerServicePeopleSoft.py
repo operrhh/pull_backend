@@ -30,12 +30,10 @@ class WorkerServicePeopleSoft:
 
         try:
             
-            database = connections['people_soft'].settings_dict['NAME']
-            #print('Base de datos: ' + database)
+            # database = connections['people_soft'].settings_dict['NAME']
 
             with connections['people_soft'].cursor() as cursor:
                 out_cur = cursor.connection.cursor()
-
                 log_entry(request.user, 'INFO', 'get_workers_peoplesoft', 'Parametros de consulta: ' + str(person_number) + ' | ' + str(first_name) + ' | ' + str(last_name) + ' | ' + str(department) )
 
                 cursor.callproc("SP_GET_WORKERS", [out_cur, person_number, first_name, last_name, department])
@@ -45,7 +43,7 @@ class WorkerServicePeopleSoft:
                         workers = self.convert_data(items)
 
                         log_entry(request.user, 'INFO', 'get_workers_peoplesoft', 'Se ha consultado workers exitosamente')
-
+ 
                         return workers
                     else:
                         raise ExceptionWorkerPeopleSoft('No se han encontrado workers')

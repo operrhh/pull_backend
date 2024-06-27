@@ -53,13 +53,42 @@ def workers_hcm_api_view(request):
                 return Response({'message': str(e)})
         if request.method == 'POST':
             try:
-                res = worker_service.create_worker_hcm(request.body)
+                res = worker_service.create_worker_hcm(request)
                 return Response(res, status = status.HTTP_200_OK)
             except Exception as e:
                 return Response({'message': str(e)})            
     except Exception as e:
         return Response({'message': str(e)})
 
+@api_view(['POST'])
+@authentication_classes([CustomTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def workers_hcm_change_manager_api_view(request):
+    try:
+        worker_service = WorkerServiceHcm()
+        if request.method == 'POST':
+            try:
+                res = worker_service.change_manager_hcm(request)
+                return Response(res, status = status.HTTP_200_OK)
+            except Exception as e:
+                return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@authentication_classes([CustomTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def workers_hcm_update_assignment_name_api_view(request):
+    try:
+        worker_service = WorkerServiceHcm()
+        if request.method == 'POST':
+            try:
+                res = worker_service.update_assignment_name_hcm(request)
+                return Response(res, status = status.HTTP_200_OK)
+            except Exception as e:
+                return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'message': str(e)}, status = status.HTTP_400_BAD_REQUEST)
 
 # endregion
 

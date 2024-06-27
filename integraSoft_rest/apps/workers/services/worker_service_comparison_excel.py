@@ -18,7 +18,7 @@ class WorkerServiceComparisonExcel:
 
     def run(self, request):
         try:
-
+            print("WorkerServiceComparisonExcel.run()")
             workers = self.worker_comparison.get_workers_comparison(request=request)
 
             workers_personal_data = workers['category']['personal_data']['data']

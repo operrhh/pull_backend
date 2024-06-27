@@ -142,6 +142,26 @@ class WorkerHcmAddressesSerializer(serializers.Serializer):
         first_link = obj.get('links')[0].get('href')
         return first_link    
 
+class WorkerHcmWorkRelationshipsAssignmentsManagerSerializer(serializers.Serializer):
+    assignment_supervisor_id = serializers.CharField(source='AssignmentSupervisorId',max_length=20)
+    effective_start_date = serializers.CharField(source='EffectiveStartDate',max_length=20)
+    effective_end_date = serializers.CharField(source='EffectiveEndDate',max_length=20)
+    manager_assignment_id = serializers.CharField(source='ManagerAssignmentId',max_length=20)
+    manager_assignment_number = serializers.CharField(source='ManagerAssignmentNumber',max_length=30)
+    manager_type = serializers.CharField(source='ManagerType',max_length=20)
+    action_code = serializers.CharField(source='ActionCode',max_length=20)
+    reason_code = serializers.CharField(source='ReasonCode',max_length=20)
+    created_by = serializers.CharField(source='CreatedBy',max_length=30)
+    creation_date = serializers.CharField(source='CreationDate',max_length=30)
+    last_updated_by = serializers.CharField(source='LastUpdatedBy',max_length=30)
+    last_update_date = serializers.CharField(source='LastUpdateDate',max_length=30)
+    link = serializers.SerializerMethodField()
+
+    def get_link(self, obj):
+        first_link = obj.get('links')[0].get('href')
+        return first_link
+
+
 class WorkerHcmWorkRelationshipsAssignmentsSerializer(serializers.Serializer):
     assignment_id = serializers.CharField(source='AssignmentId',max_length=20)
     assignment_number = serializers.CharField(source='AssignmentNumber',max_length=20)
@@ -193,11 +213,17 @@ class WorkerHcmWorkRelationshipsAssignmentsSerializer(serializers.Serializer):
     ccu_codigo_centro_costo = serializers.CharField(source='CcuCodigoCentroCosto',max_length=20)
     salary_amount = serializers.CharField(source='SalaryAmount',max_length=20)
     manager = serializers.CharField(source='Manager',max_length=20)
+    manager_detail = WorkerHcmWorkRelationshipsAssignmentsManagerSerializer()
     link = serializers.SerializerMethodField()
+    link_manager = serializers.SerializerMethodField()
 
     def get_link(self, obj):
         first_link = obj.get('links')[0].get('href')
-        return first_link    
+        return first_link
+
+    def get_link_manager(self, obj):
+        first_link = obj.get('links')[8].get('href')
+        return first_link
 
 class WorkerHcmWorkRelationshipsSerializer(serializers.Serializer):
     period_of_service_id = serializers.CharField(source='PeriodOfServiceId',max_length=20)
@@ -238,7 +264,7 @@ class WorkerHcmWorkRelationshipsSerializer(serializers.Serializer):
             return legal_employer_code
 
 class WorkerHcmSerializer(serializers.Serializer):
-    person_id = serializers.CharField(max_length=20, read_only=True)
+    person_id = serializers.CharField(max_length=30, read_only=True)
     person_number = serializers.CharField(max_length=20, read_only=True)
     date_of_birth = serializers.CharField(max_length=20)
     date_of_death = serializers.CharField(max_length=20)

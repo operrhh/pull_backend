@@ -89,7 +89,7 @@ class WorkerServiceComparison:
             raise Exception(e) from e
 
     def get_complete_name(self, first_name: str, last_name: str, middle_names: str):
-        
+
         if first_name == None:
             first_name = ''
         else:
@@ -181,6 +181,7 @@ class WorkerServiceComparison:
                     # Obtiene el valor del atributo person_number del objeto wr_ps
                     person_number_peoplesoft = getattr(wr_ps, "person_number")
 
+
                     # Si el valor de person_number se encuentra en el diccionario wsdl_dic
                     if person_number_peoplesoft in wsdl_dic:
                         i += 1
@@ -237,7 +238,7 @@ class WorkerServiceComparison:
                 print('-------------------------------\n')
 
                 print('-------------------------------')
-                print('Total de usuarios Cloud no existen en Peoplesoft')
+                print('Total de usuarios Cloud no existen en Peoplesoft (considerar darlos de baja en Cloud) ')
                 # Obtener solo los que tienen False
                 for key in not_consulted_wsdl:
                     if not_consulted_wsdl[key] == False:
@@ -263,9 +264,6 @@ class WorkerServiceComparison:
 
     def compare_workers_personal_data(self, worker_peoplesoft: WorkerFormatComparison, worker_wsdl: WorkerFormatComparison):
         try:
-
-            if worker_wsdl.person_number == '12279172-6':
-                print('Se encontro el trabajador 12279172-6 en wsdl')
 
             name = self.compare_workers_personal_data_names(worker_peoplesoft.name, worker_wsdl.name)
             email = self.compare_workers_personal_data_email(worker_peoplesoft.email, worker_wsdl.email)
@@ -400,13 +398,17 @@ class WorkerServiceComparison:
 
     def compare_workers_work_relationship(self, worker_peoplesoft: WorkerFormatComparison, worker_wsdl: WorkerFormatComparison):
         try:
+
+            if worker_wsdl.person_number == '20052268-0':
+                print('Debug')
+
             location_code = self.compare_workers_work_relationship_location_code(worker_peoplesoft.location_code, worker_wsdl.location_code)
             codigo_centro_costo = self.compare_workers_work_relationship_codigo_centro_costo(worker_peoplesoft.ccu_codigo_centro_costo, worker_wsdl.ccu_codigo_centro_costo)
             job_name = self.compare_workers_work_relationship_job_name(worker_peoplesoft.job_name, worker_wsdl.job_name)
             job_code = self.compare_workers_wort_relationship_job_code(worker_peoplesoft.job_code, worker_wsdl.job_code)
             manager_id = self.compare_workers_work_relationship_manager_id(worker_peoplesoft.manager_id, worker_wsdl.manager_id)
 
-            if location_code == False or codigo_centro_costo == False:
+            if location_code == False or codigo_centro_costo == False or job_name == False or job_code == False or manager_id == False:
                 work_relationship = {
                     'person_number': worker_peoplesoft.person_number,
                     'location_code': location_code,

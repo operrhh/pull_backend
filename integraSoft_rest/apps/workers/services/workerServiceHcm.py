@@ -3,8 +3,14 @@ from ..custom_exceptions import ExceptionWorkerHcm
 from apps.parameters.models import Parameter, ParameterType
 from ...utils import log_entry
 from .workerServicePeopleSoft import WorkerServicePeopleSoft
-from ..api.serializers import WorkerPeopleSoftSerializer
+from ..api.serializers import WorkerPeopleSoftSerializer, WorkerHcmSerializer
 
+import requests
+from django.http import HttpRequest, QueryDict
+from django.test import RequestFactory
+from datetime import datetime
+
+from ..enums import companys as company_enum
 
 class WorkerServiceHcm:
     def __init__(self):
@@ -39,11 +45,16 @@ class WorkerServiceHcm:
         self.global_service = GlobalService()
         self.peoplesoft_service = WorkerServicePeopleSoft()
 
+
+        # Version
+        self.version = None
+
         # Parametros que vienen en la request
         self.department_id_param_integrasoft: int = 0
         self.offset_param_integrasoft: int = 0
         self.last_offset_param_integrasoft: int = 0
         self.request = None
+
 
         # Parametros de uso general
         self.contador_registros: int = 0
@@ -79,19 +90,26 @@ class WorkerServiceHcm:
                     if self.list_convert_full == False and self.has_more == True:
                         self.offset_more_integrasoft = True
                         return self.get_workers_hcm(request)
+                    
+                    self.res = {
+                        'items': workers,
+                        'next': self.contador_registros if self.has_more else 0,
+                        'count': len(workers),
+                        'has_more': self.has_more,
+                        'limit': self.limit_hcm,
+                        'url': self.get_link_request(request)
+                    }  
                 else:
-                    raise ExceptionWorkerHcm('No se han encontrado worker')
+                    self.res = {
+                        'items': [],
+                        'next': 0,
+                        'count': 0,
+                        'has_more': False,
+                        'limit': self.limit_hcm,
+                        'url': self.get_link_request(request)
+                    } 
             else:
-                raise ExceptionWorkerHcm('Error al consultar workers')
-
-            self.res = {
-                'items': workers,
-                'next': self.contador_registros if self.has_more else 0,
-                'count': len(workers),
-                'has_more': self.has_more,
-                'limit': self.limit_hcm,
-                'url': self.get_link_request(request)
-            }            
+                raise ExceptionWorkerHcm('Error al consultar workers')          
             
             log_entry(request.user, 'INFO', 'get workers hcm', 'Se ha consultado workers exitosamente')
             
@@ -99,16 +117,30 @@ class WorkerServiceHcm:
         except Exception as e:
             raise Exception(e) from e
 
+
     def get_worker_hcm(self, request):
         try:
             self.request = request
-            params = self.params_definition(request)            
-            response = self.global_service.generate_request(request=request,url=self.dic_url.get('worker'), params=params)
+
+            self.version = self.request.GET.get('version', None)
+            params = self.params_definition(request)
+
+
+
+            if self.version:
+                response = self.global_service.generate_request(request=request,url=self.dic_url.get('worker'), params=params,version=self.version)
+            else:
+                response = self.global_service.generate_request(request=request,url=self.dic_url.get('worker'), params=params)
+
             if response:
                 if response.get('count') != 0:
                     item = response.get('items')
-                    worker = self.convert_data(item[0])
-                    return worker
+
+                    if self.version:
+                        return item
+                    else:
+                        worker = self.convert_data(item[0])
+                        return worker                        
                 else:
                     raise ExceptionWorkerHcm('No se han encontrado worker')
             else:
@@ -195,6 +227,7 @@ class WorkerServiceHcm:
         if manager:
             manager_number = self.convert_manager_assignment_number(manager['ManagerAssignmentNumber'])
             last_assignment['Manager'] = manager_number
+            last_assignment['manager_detail'] = manager
         else:
             last_assignment['Manager'] = None
 
@@ -313,15 +346,15 @@ class WorkerServiceHcm:
         Returns:
             A dictionary containing the constructed query parameters.
         """
-        self.many_workers = request.query_params.get('manyWorkers', 'True').lower() == 'true'
+        self.many_workers = request.GET.get('manyWorkers', 'True').lower() == 'true'
 
-        person_number = request.query_params.get('personNumber', None)
-        first_name = request.query_params.get('firstName', None)
-        last_name = request.query_params.get('lastName', None)
-        legislation_code = request.query_params.get('legislationCode', 'CL')
-        self.department_id_param_integrasoft = int(request.query_params.get('department', 0))
+        person_number = request.GET.get('personNumber', None)
+        first_name = request.GET.get('firstName', None)
+        last_name = request.GET.get('lastName', None)
+        legislation_code = request.GET.get('legislationCode', 'CL')
+        self.department_id_param_integrasoft = int(request.GET.get('department', 0))
 
-        self.offset_param_integrasoft = int(request.query_params.get('offset', 0))
+        self.offset_param_integrasoft = int(request.GET.get('offset', 0))
         self.offset_param_integrasoft = self.offset_param_integrasoft - 1
 
         self.last_offset_param_integrasoft = self.offset_param_integrasoft
@@ -358,7 +391,10 @@ class WorkerServiceHcm:
 
         if self.many_workers:
             params['expand'] = 'names,workRelationships.assignments'
-            params['onlyData'] = 'true'
+
+            if self.version is None:
+                params['onlyData'] = 'true'
+
             params['totalResults'] = 'true'
         else:
             params['expand'] = 'names,emails,addresses,phones,workRelationships.assignments,workRelationships.assignments.managers'
@@ -385,32 +421,123 @@ class WorkerServiceHcm:
         log_entry(request.user, 'INFO', 'get workers hcm (params definition)', f'Parametros de la consulta: {params}')
         return params
 
+    def get_worker_lov(self, person_id:int):
+        params = {}
+        params['q'] = f"PersonId = '{person_id}'"
+        try:
+            response = self.global_service.generate_request(request=self.request,url=self.dic_url.get('worker_lov'),params=params)
+            if response:
+                if response.get('count') != 0:
+                    worker = response.get('items')[0]
+                    return worker
+                else:
+                    raise ExceptionWorkerHcm('No se han encontrado workers')
+        except Exception as e:
+            raise Exception(e) from e
 
 
+# POST Assignment Name HCM
+
+    def update_assignment_name_hcm(self, request):
+        try:
+            worker_hcm = self.get_worker_hcm(request)[0]
+            if worker_hcm:
+                work_relationships = worker_hcm.get('workRelationships', {}).get('items', [])
+                last_work_relationship = self.get_last_work_relationship(work_relationships)
+
+                assignments = last_work_relationship.get('assignments', {}).get('items', [])
+                assignment = assignments[0]
+                assignment_link = assignment.get('@context').get('links')[0].get('href')
+                effdt = assignment.get('EffectiveStartDate')
+
+                job_id = assignment.get('JobId')
+                job = self.get_job_hcm(job_id)
+                if job:
+                    job_name = job.get('Name')
+                else:
+                    raise ExceptionWorkerHcm('No se ha encontrado Job en hcm')
+
+                res = self.update_assignment_name_hcm_data(assignment_link, job_name, effdt)
+
+                return res
+            else:
+                raise ExceptionWorkerHcm('No se ha encontrado worker en hcm')
+        except Exception as e:
+            raise Exception(e) from e
+
+    def update_assignment_name_hcm_data(self, assignment_hcm, job_name, effdt):
+        try:
+            body_data = {
+                "ActionCode":"DP_DTA",
+                "AssignmentName": job_name
+            }
+
+            response = self.global_service.generate_request(request=self.request, url=assignment_hcm, body_data=body_data, range_start_date=effdt,method='PATCH',version=self.version)
+            if response:
+                return response
+            else:
+                raise ExceptionWorkerHcm('Error al actualizar assignment name')
+        except Exception as e:
+            raise Exception(e) from e
+
+    def get_job_hcm(self, job_id):
+        params = {}
+        params['q'] = f"JobId = '{job_id}'"
+        try:
+            response = self.global_service.generate_request(request=self.request,url=self.dic_url.get('job'),params=params)
+            if response:
+                if response.get('count') != 0:
+                    job = response.get('items')[0]
+                    return job
+                else:
+                    raise ExceptionWorkerHcm('No se han encontrado jobs')
+        except Exception as e:
+            raise Exception(e) from e
 
 
 # POST Worker HCM
 
     def create_worker_hcm(self, request):
         try:
-            person_number = request.query_params.get('personNumber', None)
+            person_number = request.GET.get('personNumber', None)
 
             if person_number:
-                res = self.get_worker_hcm(request)
-                if res:
+                res = self.get_workers_hcm(request)
+                if res and res['count'] > 0:
                     raise ExceptionWorkerHcm('El worker ya existe')
                 else:
                     worker = self.peoplesoft_service.get_workers_peoplesoft(request)
                     if worker:
-                        worker_serializer = WorkerPeopleSoftSerializer(worker)
-                        res = self.create_worker_hcm_data(worker_serializer.data)
+                        worker_serializer = WorkerPeopleSoftSerializer(worker, many=True)
+                        res = self.create_worker_hcm_data(request, worker_serializer.data)
             else:
                 raise ExceptionWorkerHcm('El parametro personNumber es requerido')
 
         except Exception as e:
             raise Exception(e) from e
     
-    def create_worker_hcm_data(self, worker):
+    def create_worker_hcm_data(self, request, worker):
+        worker = worker[0]
+
+        fake_request = self.create_fake_request(request, worker.get('supervisor_id'))
+
+        # Crear variable que tenga la estructura de una request
+        res_manager = self.get_workers_hcm(fake_request)
+
+        if res_manager and res_manager['count'] > 0:
+            manager = res_manager['items'][0]
+        else:
+            manager = None
+        
+        dt = str(manager.get("work_relationships")[0].get("StartDate"))
+        dt_object = datetime.strptime(dt, '%Y-%m-%d')
+        formatted_date_manager = dt_object.strftime('%d%m%Y')
+
+        manager_assignment_number = manager.get("work_relationships")[0].get("assignment").get("AssignmentNumber")
+
+
+        worker = self.create_worker_hcm_format_company(worker)
+
         try:
             body_data = {
                 "PersonNumber": worker.get('emplid'),
@@ -421,7 +548,6 @@ class WorkerServiceHcm:
                         "LegislationCode": "CL",
                         "Gender": worker.get('sex'),
                         "MaritalStatus": worker.get('mar_status'),
-                        "HighestEducationLevel": worker.get('highest_educ_lvl'),
                     }
                 ],
                 "names":[
@@ -450,15 +576,7 @@ class WorkerServiceHcm:
                     {
                         "EmailType":"H1",
                         "EmailAddress": worker.get('email'),
-                        "FromDate":"",
-                        "PrimaryFlag": True
-                    }
-                ],
-                "phones":[
-                    {
-                        "PhoneType":"HM",
-                        "PhoneNumber": worker.get('phone'),
-                        "FromDate":"",
+                        "FromDate":worker.get('effdt'),
                         "PrimaryFlag": True
                     }
                 ],
@@ -472,7 +590,7 @@ class WorkerServiceHcm:
                 ],
                 "workRelationships":[
                     {
-                        "LegalEmployerName":worker.get('company_descr'),
+                        "LegalEmployerName": f"{worker.get('company_code')} - {worker.get('company_descr')}",
                         "WorkerType":"E",
                         "StartDate":worker.get('effdt'),
                         "EnterpriseSeniorityDate":worker.get('effdt'),
@@ -482,20 +600,29 @@ class WorkerServiceHcm:
                             {
                                 "BusinessUnitName": f"{worker.get('company_code')} - {worker.get('company_descr')} BU",
                                 "ActionCode":"HIRE",
-                                "ReasonCode":"",
+                                "ReasonCode":None,
                                 "JobCode":worker.get('jobcode'),
                                 "DepartmentName": f"{worker.get('deptid')} - {worker.get('dept_descr')}",
                                 "LocationCode":worker.get('location'),
                                 "AssignmentCategory":"FR",
-                                "PermanentTemporary":"",
+                                "PermanentTemporary":"R",
                                 "FullPartTime":"FULL_TIME",
                                 "ManagerFlag":False,
                                 "NormalHours":180,
                                 "Frequency":"M",
-                                "WorkerCategory":worker.get('job_family'),
+                                #"WorkerCategory":worker.get('job_family'),
                                 "CollectiveAgreementName": worker.get('labor_agreement'),
                                 "UnionName":f"{worker.get('union_code')} - {worker.get('union_descr')}",
                                 "LabourUnionMemberFlag":True,
+                                "managers":[
+                                    {
+                                        #"ManagerAssignmentNumber":f'{manager.get("person_number")}_{worker.get("company_code")}_{formatted_date_manager}',
+                                        "ManagerAssignmentNumber":manager_assignment_number,
+                                        "ManagerType":"LINE_MANAGER",
+                                        "ActionCode":"MANAGER_CHANGE",
+                                        "ReasonCode":None,                                        
+                                    }
+                                ]
                             }
                         ]
                     }
@@ -503,10 +630,89 @@ class WorkerServiceHcm:
             }
 
 
-            response = self.global_service.generate_request(request=self.request, url=self.dic_url.get('worker'), body_data=body_data, method='POST')
+            response = self.global_service.generate_request(request=self.request, url=self.dic_url.get('worker'), body_data=body_data, method='POST', range_start_date=worker.get('effdt'))
             if response:
                 return response
             else:
                 raise ExceptionWorkerHcm('Error al crear worker')            
         except Exception as e:
             raise Exception(e) from e
+    
+    def create_worker_hcm_format_company(self, worker):
+        company_code = worker.get('company_code')
+        
+        company_detail = company_enum.get(company_code)
+
+        worker['company_descr'] = company_detail
+
+        return worker
+
+    def create_fake_request(self, request, person_number):
+
+        factory = RequestFactory()
+        simulated_request = factory.get('/', data={'personNumber': person_number, 'manyWorkers': 'False'})
+
+        simulated_request.query_params = simulated_request.GET
+        simulated_request.user = request.user
+        simulated_request.build_absolute_uri = request.build_absolute_uri
+
+
+        # django_request = HttpRequest()
+        # django_request.method = 'GET'
+        # django_request.GET = QueryDict(f'personNumber={person_number}')
+
+        return simulated_request
+
+# POST Manager HCM
+
+    def change_manager_hcm(self, request):
+        try:
+            worker_peoplesoft = self.peoplesoft_service.get_workers_peoplesoft(request)
+            if worker_peoplesoft:
+                worker_peoplesoft_serializer = WorkerPeopleSoftSerializer(worker_peoplesoft, many=True)
+                worker_peoplesoft = worker_peoplesoft_serializer.data
+            else:
+                raise ExceptionWorkerHcm('No se ha encontrado worker en peoplesoft')
+            
+            person_number_manager = worker_peoplesoft[0].get('supervisor_id')
+            manager_hcm = self.get_worker_with_fake_request(request, person_number_manager)
+            if manager_hcm:
+                manager_hcm_serializer = WorkerHcmSerializer(manager_hcm)
+                manager_hcm = manager_hcm_serializer.data
+
+            request_person_number_worker = request.GET.get('personNumber', None)
+            worker_hcm = self.get_worker_with_fake_request(request, request_person_number_worker)
+            if worker_hcm:
+                worker_hcm_serializer = WorkerHcmSerializer(worker_hcm)
+                worker_hcm = worker_hcm_serializer.data
+
+            res = self.update_manager_hcm(manager_hcm, worker_hcm, worker_peoplesoft[0].get('effdt'))
+            return res
+        except Exception as e:
+            raise Exception(e) from e
+
+    def update_manager_hcm(self, manager_hcm, worker_hcm, effdt):
+        try:
+
+            manger_lov = self.get_worker_lov(int(manager_hcm.get('person_id')))
+
+            payload  = {
+                "ManagerAssignmentNumber": manger_lov.get('AssignmentNumber'),
+                "ManagerType": "LINE_MANAGER",
+                "ActionCode": "MANAGER_CHANGE",
+                "ReasonCode": None,
+            }
+
+
+            url_change_manager = worker_hcm.get('work_relationships')[0].get('assignment').get('manager_detail').get('link')
+
+            response = self.global_service.generate_request(request=self.request, url=url_change_manager, body_data=payload, range_start_date=effdt,method='PATCH')
+
+            return response
+        except Exception as e:
+            raise Exception(e) from e
+
+    def get_worker_with_fake_request(self, request, person_number):
+        fake_request = self.create_fake_request(request, person_number)
+        worker = self.get_worker_hcm(fake_request)
+        return worker

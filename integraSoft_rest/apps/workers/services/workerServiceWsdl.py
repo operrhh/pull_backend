@@ -65,9 +65,28 @@ class WorkerServiceWsdl:
                             'templateParam': '?',
                             'useNullForAll': '?',
                             'values': {
-                                'item': [
+                                'item':[
+                                    '00 - Compañía Cervecerías Unidas S.A.',
+                                    #'07 - La Barra S.A.',
+                                    #'31 - Fábrica de Envases Plásticos S.A.',
+                                    #'32 - Transportes CCU Ltda.',
+                                    #'40 - Financiera CRECCU S.A.',
+                                    #'50 - Viña San Pedro Tarapacá S.A.',
+                                    #'51 - Viña Santa Helena S.A.',
+                                    #'60 - Cervecera Austral S.A.',
+                                    #'61 - Comercial Patagona Ltda.',
+                                    #'63 - Compañía Cervecera Kunstmann S.A.',
+                                    #'71 - Compañía Pisquera de Chile S.A.',
+                                    #'80 - Aguas CCU-Nestle Chile S.A',
+                                    #'81 - Manantial S.A.',
+                                    #'83 - Bebidas Ecusa SPA',
+                                    #'90 - Embotelladoras Chilenas Unidas S.A.',
+                                    #'96 - Comercial CCU S.A.'
+                                ],
+
+                                #'item': [
                                             # 40 50 60 61 63 71 80 81 83 90 96
-                                    # '00 - Compañía Cervecerías Unidas S.A.', LISTO
+                                    # '00 - Compañía Cervecerías Unidas S.A.',
                                     # '07 - La Barra S.A.', LISTO
                                     # '11 - Compañía Industrial Cervecera S.A.', NOOOO
                                     # '16 - Saenz Briones y CIA S.A.I.C.', NOOOO
@@ -78,7 +97,7 @@ class WorkerServiceWsdl:
                                     # '32 - Transportes CCU Ltda.',
                                     # '35 - Bebidas del Paraguay SA', NOOOO
                                     # '36 - Distribuidora del Paraguay SA', NOOOO
-                                    '40 - Financiera CRECCU S.A.',
+                                    # '40 - Financiera CRECCU S.A.',
                                     # '45 - Vitivinícola del Maipo S.A.', NOOOO
                                     # '46 - Viña del Mar de Casablanca S.A.', NOOOO
                                     # '47 - Viña Misiones de Rengo S.A.', NOOOO
@@ -104,7 +123,7 @@ class WorkerServiceWsdl:
                                     # '96 - Comercial CCU S.A.',
                                     # '97 - Foods Cia de Alimentos CCU S.A.', NOOOO
                                     # '99 - Promarca S.A.' NOOOO
-                                ]
+                                #]
                             }
                         }
                     ]
@@ -140,14 +159,16 @@ class WorkerServiceWsdl:
                     # Filtrar los registros que no tienen el campo Puesto
                     df_filtrado = df[df['job_name'].notnull()]
 
-                    # Sustituir los valores nulos en el campo Email por 'No tiene correo'
+                    # Sustituir los valores nulos en el campo Email por 'NA'
                     df_filtrado.loc[df_filtrado['email_emplid'].isnull(), 'email_emplid'] = 'NA'
 
                     # Reemplazar los NaN por None
                     df_filtrado = df_filtrado.where(pd.notna(df_filtrado), None)
+                    df_filtrado_final = df_filtrado.applymap(lambda x: None if pd.isna(x) else x)
+
 
                     # Crear una lista de diccionarios a partir del DataFrame
-                    res = df_filtrado.to_dict(orient='records')
+                    res = df_filtrado_final.to_dict(orient='records')
 
                     return res
     
